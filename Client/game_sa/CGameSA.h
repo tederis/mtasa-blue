@@ -14,75 +14,75 @@
 #include "CModelInfoSA.h"
 #include "CFxManagerSA.h"
 
-#define     MAX_MEMORY_OFFSET_1_0           0xCAF008
+#define MAX_MEMORY_OFFSET_1_0 0xCAF008
 
-#define     CLASS_CPlayerInfo               0xB7CD98    // ##SA##
-#define     CLASS_CCamera                   0xB6F028    // ##SA##
-#define     CLASS_CPad                      0xB73458    // ##SA##
-#define     CLASS_CGarages                  0x96C048    // ##SA##
-#define     CLASS_CFx                       0xa9ae00    // ##SA##
-#define     CLASS_CFxManager                0xA9AE80    // ##SA##
-#define     CLASS_CMenuManager              0xBA6748    // ##SA##
+#define CLASS_CPlayerInfo 0xB7CD98             // ##SA##
+#define CLASS_CCamera 0xB6F028                 // ##SA##
+#define CLASS_CPad 0xB73458                    // ##SA##
+#define CLASS_CGarages 0x96C048                // ##SA##
+#define CLASS_CFx 0xa9ae00                     // ##SA##
+#define CLASS_CFxManager 0xA9AE80              // ##SA##
+#define CLASS_CMenuManager 0xBA6748            // ##SA##
 
-#define     CLASS_RwCamera                  0xB6F97C
+#define CLASS_RwCamera 0xB6F97C
 
-#define     ARRAY_WeaponInfo                0xC8AAB8    // ##SA##
-#define     CLASSSIZE_WeaponInfo            112         // ##SA##
-#define     NUM_WeaponInfosStdSkill         WEAPONTYPE_LAST_WEAPONTYPE
-#define     NUM_WeaponInfosOtherSkill       11
-#define     NUM_WeaponInfosTotal            (NUM_WeaponInfosStdSkill + (3*NUM_WeaponInfosOtherSkill)) // std, (poor, pro, special)
+#define ARRAY_WeaponInfo 0xC8AAB8            // ##SA##
+#define CLASSSIZE_WeaponInfo 112             // ##SA##
+#define NUM_WeaponInfosStdSkill WEAPONTYPE_LAST_WEAPONTYPE
+#define NUM_WeaponInfosOtherSkill 11
+#define NUM_WeaponInfosTotal (NUM_WeaponInfosStdSkill + (3 * NUM_WeaponInfosOtherSkill))            // std, (poor, pro, special)
 
-#define     MODELINFO_MAX                   26000       // Actual max is 25755
+#define MODELINFO_MAX 26000            // Actual max is 25755
 
-#define     FUNC_GetLevelFromPosition       0x4DD300
+#define FUNC_GetLevelFromPosition 0x4DD300
 
-#define     FUNC_CDebug_DebugDisplayTextBuffer      0x532260
-#define     FUNC_JPegCompressScreenToFile   0x5D0820
+#define FUNC_CDebug_DebugDisplayTextBuffer 0x532260
+#define FUNC_JPegCompressScreenToFile 0x5D0820
 
-#define     VAR_FlyingCarsEnabled           0x969160 // ##SA##
-#define     VAR_ExtraBunnyhopEnabled        0x969161 // ##SA##
-#define     VAR_HoveringCarsEnabled         0x969152 // ##SA##
-#define     VAR_ExtraJumpEnabled            0x96916C // ##SA##
-#define     VAR_TankModeEnabled             0x969164 // ##SA##
-#define     VAR_NoReloadEnabled             0x969178 // ##SA##
-#define     VAR_PerfectHandling             0x96914C // ##SA##
-#define     VAR_AllCarsHaveNitro            0x969165 // ##SA##
-#define     VAR_BoatsCanFly                 0x969153 // ##SA##
-#define     VAR_InfiniteOxygen              0x96916E // ##SA##
-#define     VAR_FasterClock                 0x96913B // ##SA##
-#define     VAR_FasterGameplay              0x96913C // ##SA##
-#define     VAR_SlowerGameplay              0x96913D // ##SA##
-#define     VAR_AlwaysMidnight              0x969167 // ##SA##
-#define     VAR_FullWeaponAiming            0x969179 // ##SA##
-#define     VAR_InfiniteHealth              0x96916D // ##SA##
-#define     VAR_NeverWanted                 0x969171 // ##SA##
-#define     VAR_HealthArmorMoney            0x969133 // ##SA##
-#define     VAR_WalkUnderwater              0x6C2759
+#define VAR_FlyingCarsEnabled 0x969160               // ##SA##
+#define VAR_ExtraBunnyhopEnabled 0x969161            // ##SA##
+#define VAR_HoveringCarsEnabled 0x969152             // ##SA##
+#define VAR_ExtraJumpEnabled 0x96916C                // ##SA##
+#define VAR_TankModeEnabled 0x969164                 // ##SA##
+#define VAR_NoReloadEnabled 0x969178                 // ##SA##
+#define VAR_PerfectHandling 0x96914C                 // ##SA##
+#define VAR_AllCarsHaveNitro 0x969165                // ##SA##
+#define VAR_BoatsCanFly 0x969153                     // ##SA##
+#define VAR_InfiniteOxygen 0x96916E                  // ##SA##
+#define VAR_FasterClock 0x96913B                     // ##SA##
+#define VAR_FasterGameplay 0x96913C                  // ##SA##
+#define VAR_SlowerGameplay 0x96913D                  // ##SA##
+#define VAR_AlwaysMidnight 0x969167                  // ##SA##
+#define VAR_FullWeaponAiming 0x969179                // ##SA##
+#define VAR_InfiniteHealth 0x96916D                  // ##SA##
+#define VAR_NeverWanted 0x969171                     // ##SA##
+#define VAR_HealthArmorMoney 0x969133                // ##SA##
+#define VAR_WalkUnderwater 0x6C2759
 
-#define CHEAT_HOVERINGCARS          "hovercars"
-#define CHEAT_FLYINGCARS            "aircars"
-#define CHEAT_EXTRABUNNYHOP         "extrabunny"
-#define CHEAT_EXTRAJUMP             "extrajump"
-#define CHEAT_TANKMODE              "tankmode"
-#define CHEAT_NORELOAD              "noreload"
-#define CHEAT_PERFECTHANDLING       "perfecthandling"
-#define CHEAT_ALLCARSHAVENITRO      "allcarshavenitro"
-#define CHEAT_BOATSCANFLY           "airboats"
-#define CHEAT_INFINITEOXYGEN        "infiniteoxygen"
-#define CHEAT_WALKUNDERWATER        "walkunderwater"
-#define CHEAT_FASTERCLOCK           "fasterclock"
-#define CHEAT_FASTERGAMEPLAY        "fastergameplay"
-#define CHEAT_SLOWERGAMEPLAY        "slowergameplay"
-#define CHEAT_ALWAYSMIDNIGHT        "alwaysmidnight"
-#define CHEAT_FULLWEAPONAIMING      "fullweaponaiming"
-#define CHEAT_INFINITEHEALTH        "infinitehealth"
-#define CHEAT_NEVERWANTED           "neverwanted"
-#define CHEAT_HEALTARMORMONEY       "healtharmormoney"
+#define CHEAT_HOVERINGCARS "hovercars"
+#define CHEAT_FLYINGCARS "aircars"
+#define CHEAT_EXTRABUNNYHOP "extrabunny"
+#define CHEAT_EXTRAJUMP "extrajump"
+#define CHEAT_TANKMODE "tankmode"
+#define CHEAT_NORELOAD "noreload"
+#define CHEAT_PERFECTHANDLING "perfecthandling"
+#define CHEAT_ALLCARSHAVENITRO "allcarshavenitro"
+#define CHEAT_BOATSCANFLY "airboats"
+#define CHEAT_INFINITEOXYGEN "infiniteoxygen"
+#define CHEAT_WALKUNDERWATER "walkunderwater"
+#define CHEAT_FASTERCLOCK "fasterclock"
+#define CHEAT_FASTERGAMEPLAY "fastergameplay"
+#define CHEAT_SLOWERGAMEPLAY "slowergameplay"
+#define CHEAT_ALWAYSMIDNIGHT "alwaysmidnight"
+#define CHEAT_FULLWEAPONAIMING "fullweaponaiming"
+#define CHEAT_INFINITEHEALTH "infinitehealth"
+#define CHEAT_NEVERWANTED "neverwanted"
+#define CHEAT_HEALTARMORMONEY "healtharmormoney"
 
-#define PROP_RANDOM_FOLIAGE         "randomfoliage"
-#define PROP_SNIPER_MOON            "snipermoon"
-#define PROP_EXTRA_AIR_RESISTANCE   "extraairresistance"
-#define PROP_UNDERWORLD_WARP        "underworldwarp"
+#define PROP_RANDOM_FOLIAGE "randomfoliage"
+#define PROP_SNIPER_MOON "snipermoon"
+#define PROP_EXTRA_AIR_RESISTANCE "extraairresistance"
+#define PROP_UNDERWORLD_WARP "underworldwarp"
 
 struct SCheatSA
 {
@@ -401,6 +401,9 @@ public:
     bool PerformChecks();
     int& GetCheckStatus() { return m_iCheckStatus; }
 
+    bool IsCollisionDebugEnabled() const { return m_bCollisionDebug; }
+    void SetCollisionDebugEnabled(bool bEnable) { m_bCollisionDebug = bEnable; }
+
     void SetAsyncLoadingFromScript(bool bScriptEnabled, bool bScriptForced);
     void SuspendASyncLoading(bool bSuspend, uint uiAutoUnsuspendDelay = 0);
     bool IsASyncLoadingEnabled(bool bIgnoreSuspend = false);
@@ -488,6 +491,7 @@ private:
     bool         m_bASyncLoadingSuspended;
     int          m_iCheckStatus;
     bool         m_bUnderworldWarp;
+    bool         m_bCollisionDebug = false;
 
     static unsigned long* VAR_SystemTime;
     static unsigned long* VAR_IsAtMenu;

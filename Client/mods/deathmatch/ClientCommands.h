@@ -83,5 +83,6 @@ void COMMAND_Debug4(const char* szCmdLine);
 #endif
 
 // Commands enabled when development mode in on
+void COMMAND_ShowPhysics(const char* szCmdLine);
 void COMMAND_ShowCollision(const char* szCmdLine);
 void COMMAND_ShowSound(const char* szCmdLine);

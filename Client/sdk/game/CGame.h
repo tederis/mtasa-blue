@@ -229,6 +229,9 @@ public:
     virtual bool PerformChecks() = 0;
     virtual int& GetCheckStatus() = 0;
 
+    virtual bool IsCollisionDebugEnabled() const = 0;
+    virtual void SetCollisionDebugEnabled(bool bEnable) = 0;
+
     virtual void SetAsyncLoadingFromScript(bool bScriptEnabled, bool bScriptForced) = 0;
     virtual void SuspendASyncLoading(bool bSuspend, uint uiAutoUnsuspendDelay = 0) = 0;
     virtual bool IsASyncLoadingEnabled(bool bIgnoreSuspend = false) = 0;

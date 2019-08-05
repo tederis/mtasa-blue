@@ -6590,6 +6590,20 @@ void CClientGame::SetDevelopmentMode(bool bEnable, bool bEnableWeb)
         g_pCore->GetWebCore()->SetTestModeEnabled(bEnableWeb);
 }
 
+void CClientGame::SetShowPhysics(bool bEnable)
+{
+    if (g_pGame->IsGameLoaded())
+        g_pGame->SetCollisionDebugEnabled(bEnable);
+}
+
+bool CClientGame::GetShowCollision() const
+{
+    if (g_pGame->IsGameLoaded())
+        return g_pGame->IsCollisionDebugEnabled();
+
+    return false;
+}
+
 //////////////////////////////////////////////////////////////////
 //
 // CClientGame::StaticWorldSoundHandler

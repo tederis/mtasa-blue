@@ -876,9 +876,9 @@ CVehicle* CPoolsSA::AddTrain(CClientVehicle* pClientVehicle, CVector* vecPositio
 
     DWORD dwFunc = FUNC_CTrain_CreateMissionTrain;
     _asm
-    {
+        {
         push    0            // place as close to point as possible (rather than at node)? (maybe) (actually seems to have an effect on the speed, so changed from
-                             // 1 to 0)
+                           // 1 to 0)
                              push    iDesiredTrackId            // track ID
                              push    iNodeId            // node to start at (-1 for closest node)
                              lea     ecx, pTrainEnd
@@ -892,7 +892,7 @@ CVehicle* CPoolsSA::AddTrain(CClientVehicle* pClientVehicle, CVector* vecPositio
                              push    fX            // x
                              call    dwFunc
                              add     esp, 0x28
-    }
+        }
 
     // Enable GetVehicle
     m_bGetVehicleEnabled = true;

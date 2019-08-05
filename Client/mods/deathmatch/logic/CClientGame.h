@@ -410,8 +410,10 @@ public:
 
     void SetDevelopmentMode(bool bEnable, bool bEnableWeb);
     bool GetDevelopmentMode() { return m_bDevelopmentMode; }
+    void SetShowPhysics(bool bEnable);
     void SetShowCollision(bool bEnable) { m_bShowCollision = bEnable; }
-    bool GetShowCollision() { return m_bShowCollision; }
+    bool GetShowPhysics() { return m_bShowPhysics; }
+    bool GetShowCollision() const;
     void SetShowSound(bool bEnable) { m_bShowSound = bEnable; }
     bool GetShowSound() { return m_bShowSound; }
 
@@ -805,6 +807,7 @@ private:
     bool                      m_bShowInterpolation;
     #endif
     bool m_bDevelopmentMode;
+    bool m_bShowPhysics;
     bool m_bShowCollision;
     bool m_bShowSound;
 

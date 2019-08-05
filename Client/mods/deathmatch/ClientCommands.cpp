@@ -1023,6 +1023,16 @@ void COMMAND_Debug4(const char* szCmdLine)
 }
 #endif
 
+void COMMAND_ShowPhysics(const char* szCmdLine)
+{
+    int  iCmd = (szCmdLine && szCmdLine[0]) ? atoi(szCmdLine) : -1;
+    bool bShow = (iCmd == 1) ? true : (iCmd == 0) ? false : !g_pClientGame->GetShowPhysics();
+    g_pClientGame->SetShowPhysics(bShow);
+    g_pCore->GetConsole()->Printf("showphys is now set to %d", bShow ? 1 : 0);
+    if (bShow && !g_pClientGame->GetDevelopmentMode())
+        g_pCore->GetConsole()->Print("showphys will have no effect because development mode is off");
+}
+
 void COMMAND_ShowCollision(const char* szCmdLine)
 {
     int  iCmd = (szCmdLine && szCmdLine[0]) ? atoi(szCmdLine) : -1;
