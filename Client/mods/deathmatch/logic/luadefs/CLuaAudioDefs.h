@@ -66,4 +66,7 @@ public:
     LUA_DECLARE(SetRadioChannel);
     LUA_DECLARE(GetRadioChannel);
     LUA_DECLARE(GetRadioChannelName);
+
+    // Voice functions
+    LUA_DECLARE(ToggleVoice);
 };

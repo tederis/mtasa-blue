@@ -764,6 +764,7 @@ public:
     static bool   SetSoundEffectEnabled(CClientPlayer& Player, const SString& strEffectName, bool bEnable);
     static bool   SetSoundPan(CClientPlayer& Player, float fPan);
     static bool   GetSoundPan(CClientPlayer& Player, float& fPan);
+    static bool   ToggleVoice(bool bState);
 
     // Handling funcs
     static eHandlingProperty GetVehicleHandlingEnum(std::string strProperty);

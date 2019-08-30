@@ -62,6 +62,9 @@ void CLuaAudioDefs::LoadFunctions()
         {"setRadioChannel", SetRadioChannel},
         {"getRadioChannel", GetRadioChannel},
         {"getRadioChannelName", GetRadioChannelName},
+
+        // Voice funcs
+        {"toggleVoice", ToggleVoice},
     };
 
     // Add functions
@@ -1767,6 +1770,27 @@ int CLuaAudioDefs::GetRadioChannelName(lua_State* luaVM)
         if (iChannel >= 0 && iChannel < NUMELMS(szRadioStations))
         {
             lua_pushstring(luaVM, szRadioStations[iChannel]);
+            return 1;
+        }
+    }
+    else
+        m_pScriptDebugging->LogCustom(luaVM, argStream.GetFullErrorMessage());
+
+    lua_pushboolean(luaVM, false);
+    return 1;
+}
+
+int CLuaAudioDefs::ToggleVoice(lua_State* luaVM)
+{
+    bool bState = false;
+    CScriptArgReader argStream(luaVM);
+    argStream.ReadBool(bState, false);
+
+    if (!argStream.HasErrors())
+    {
+        if (CStaticFunctionDefinitions::ToggleVoice(bState))
+        {
+            lua_pushboolean(luaVM, true);
             return 1;
         }
     }
