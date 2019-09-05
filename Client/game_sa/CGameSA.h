@@ -291,6 +291,11 @@ public:
         DEBUG_TRACE("CRenderWare * GetRenderWare()");
         return m_pRenderWare;
     };
+    class CVehicleAdjuster* GetVehicleAdjuster()
+    {
+        DEBUG_TRACE("CAdjusters     * GetVehicleAdjuster()");
+        return m_pVehAdjuster;
+    };
     CHandlingManager*   GetHandlingManager() { return m_pHandlingManager; };
     CAnimManager*       GetAnimManager() { return m_pAnimManager; }
     CStreaming*         GetStreaming() { return m_pStreaming; }
@@ -481,6 +486,8 @@ private:
     CGameSettings*            m_pSettings;
     CCarEnterExit*            m_pCarEnterExit;
     CControllerConfigManager* m_pControllerConfigManager;
+
+    class CVehicleAdjuster*         m_pVehAdjuster;
 
     eGameVersion m_eGameVersion;
     bool         m_bAsyncScriptEnabled;

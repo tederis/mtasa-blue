@@ -244,7 +244,7 @@ BOOL CModelInfoSA::IsVehicle()
     */
 
     // Above doesn't seem to work
-    return m_dwModelID >= 400 && m_dwModelID <= 611;
+    return (m_dwModelID >= 400 && m_dwModelID <= 611) || (m_dwModelID >= 11682 && m_dwModelID <= 12799);
 }
 
 bool CModelInfoSA::IsPlayerModel()

@@ -437,7 +437,7 @@ bool CEntityAddPacket::Write(NetBitStreamInterface& BitStream) const
                     // fit into a char?  Why doesn't someone document this?
                     //
                     // --slush
-                    BitStream.Write(static_cast<unsigned char>(pVehicle->GetModel() - 400));
+                    BitStream.Write(static_cast<unsigned short>(pVehicle->GetModel() - 400));
 
                     // Health
                     SVehicleHealthSync health;

@@ -34,6 +34,8 @@ public:
 
     static bool               IsTrainModel(unsigned long ulModel);
     static bool               IsValidModel(unsigned long ulModel);
+    static bool               IsOriginalModel(unsigned long ulModel);
+    static bool               IsExtraModel(unsigned long ulModel);
     static eClientVehicleType GetVehicleType(unsigned long ulModel);
     static unsigned char      GetMaxPassengerCount(unsigned long ulModel);
     static unsigned char      ConvertIndexToGameSeat(unsigned long ulModel, unsigned char ucIndex);

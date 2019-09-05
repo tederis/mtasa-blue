@@ -135,7 +135,9 @@ const CHandlingEntry* CHandlingManager::GetModelHandlingData(eVehicleTypes eMode
         return m_pModelEntries[eHandling];
     }
 
-    return NULL;
+    // Extra models?
+    eHandlingTypes eHandling = GetHandlingID((eVehicleTypes)549);
+    return m_pModelEntries[eHandling];
 }
 
 eHandlingProperty CHandlingManager::GetPropertyEnumFromName(std::string strName)

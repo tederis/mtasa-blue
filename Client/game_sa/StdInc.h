@@ -31,6 +31,7 @@
 #include "CEntitySA.h"
 #include "gamesa_init.h"
 #include "Common.h"
+#include "CVehicleAdjuster.h"
 #include "CGameSA.h"
 #include "CWorldSA.h"
 #include "CPoolsSA.h"

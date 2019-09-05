@@ -3131,7 +3131,7 @@ retry:
                     bitStream.Read(&rotationDegrees);
 
                     // Read out the vehicle value as a char, then convert
-                    unsigned char ucModel = 0xFF;
+                    unsigned short ucModel = 0xFF;
                     bitStream.Read(ucModel);
 
                     // The server appears to subtract 400 from the vehicle id before

@@ -40,7 +40,10 @@ CClientVehicle::CClientVehicle(CClientManager* pManager, ElementID ID, unsigned 
     m_pVehicle = NULL;
     m_pUpgrades = new CVehicleUpgrades(this);
     m_pClump = NULL;
-    m_pOriginalHandlingEntry = g_pGame->GetHandlingManager()->GetOriginalHandlingData(static_cast<eVehicleTypes>(usModel));
+    if (CClientVehicleManager::IsExtraModel(usModel))
+        m_pOriginalHandlingEntry = g_pGame->GetHandlingManager()->GetOriginalHandlingData(static_cast<eVehicleTypes>(549));
+    else
+        m_pOriginalHandlingEntry = g_pGame->GetHandlingManager()->GetOriginalHandlingData(static_cast<eVehicleTypes>(usModel));
     m_pHandlingEntry = g_pGame->GetHandlingManager()->CreateHandlingData();
     m_pHandlingEntry->Assign(m_pOriginalHandlingEntry);
 
@@ -1057,7 +1060,10 @@ void CClientVehicle::SetModelBlocking(unsigned short usModel, unsigned char ucVa
         m_ucMaxPassengers = CClientVehicleManager::GetMaxPassengerCount(usModel);
 
         // Reset handling to fit the vehicle
-        m_pOriginalHandlingEntry = g_pGame->GetHandlingManager()->GetOriginalHandlingData((eVehicleTypes)usModel);
+        if (CClientVehicleManager::IsExtraModel(usModel))
+            m_pOriginalHandlingEntry = g_pGame->GetHandlingManager()->GetOriginalHandlingData((eVehicleTypes)(549));
+        else
+            m_pOriginalHandlingEntry = g_pGame->GetHandlingManager()->GetOriginalHandlingData((eVehicleTypes)(usModel));
         m_pHandlingEntry->Assign(m_pOriginalHandlingEntry);
         ApplyHandling();
 
