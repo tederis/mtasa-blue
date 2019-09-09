@@ -42,6 +42,7 @@ public:
     static eVehicleType GetVehicleType(unsigned short usModel);
     static bool         IsValidUpgrade(unsigned short usUpgrade);
     static unsigned int GetMaxPassengers(unsigned int uiVehicleModel);
+    static bool         SetMaxPassengerCount(unsigned long ulModel, unsigned char ucMaxCount);
     static bool         HasTurret(unsigned int uiVehicleModel);
     static bool         HasSirens(unsigned int uiVehicleModel);
     static bool         HasTaxiLight(unsigned int uiVehicleModel);

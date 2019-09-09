@@ -123,4 +123,5 @@ public:
     LUA_DECLARE(GetVehicleSirens);
     LUA_DECLARE(GetVehicleSirenParams);
     LUA_DECLARE(SetVehiclePlateText);
+    LUA_DECLARE(SetVehicleMaxPassengers);
 };

@@ -15,7 +15,8 @@
 class CClientManager;
 class CClientVehicle;
 
-extern const SFixedArray<unsigned char, 212> g_ucMaxPassengers;
+extern SFixedArray<unsigned char, 212> g_ucMaxPassengers;
+extern SFixedArray<unsigned char, 1118> g_ucMaxExtraPassengers;
 
 class CClientVehicleManager
 {
@@ -37,6 +38,7 @@ public:
     static bool               IsOriginalModel(unsigned long ulModel);
     static bool               IsExtraModel(unsigned long ulModel);
     static eClientVehicleType GetVehicleType(unsigned long ulModel);
+    static bool               SetMaxPassengerCount(unsigned long ulModel, unsigned char ucMaxCount);
     static unsigned char      GetMaxPassengerCount(unsigned long ulModel);
     static unsigned char      ConvertIndexToGameSeat(unsigned long ulModel, unsigned char ucIndex);
     static void               GetRandomVariation(unsigned short usModel, unsigned char& ucVariant, unsigned char& ucVariant2);
@@ -74,5 +76,5 @@ protected:
     CClientManager*               m_pManager;
     bool                          m_bCanRemoveFromList;
     CMappedArray<CClientVehicle*> m_List;
-    CMappedArray<CClientVehicle*> m_StreamedIn;
+    CMappedArray<CClientVehicle*> m_StreamedIn;    
 };

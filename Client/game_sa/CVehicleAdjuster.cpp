@@ -4,16 +4,16 @@
 
 DWORD CONTINUE_CVehicleModelInfo_Ctor = 0x4C75E9;
 
-// Initialises CVehicleModelInfo::m_apDirtMaterials at CVehicleModelInfo constructor 
+// Initialises CVehicleModelInfo::m_apDirtMaterials at CVehicleModelInfo constructor
 void _declspec(naked) HOOK_FixConstructor()
 {
     static void* modelInfoPtr;
 
     _asm
-    {
+        {
         mov     modelInfoPtr, ecx
         pushad
-    }
+        }
 
     MemSetFast((char*)(modelInfoPtr) + 0x230, 0, 16 * 4);
 
@@ -33,10 +33,8 @@ void _declspec(naked) HOOK_LoadingScreenLoadingFile()
         pushad
     }
 
-    if (pGame)
-        pGame->GetVehicleAdjuster()->ApplyReflection();
+    if (pGame) pGame->GetVehicleAdjuster()->ApplyReflection();
 
-  
     _asm
     {
         popad
@@ -57,9 +55,8 @@ void _declspec(naked) HOOK_AddVehicleModel()
         pushad
     }
 
-    if (pGame)
-        pGame->GetVehicleAdjuster()->AddVehicleModel(dwAddVehicleModel);
-  
+    if (pGame) pGame->GetVehicleAdjuster()->AddVehicleModel(dwAddVehicleModel);
+
     _asm
     {
         popad
@@ -94,7 +91,7 @@ CVehicleAdjuster::CVehicleAdjuster()
 void CVehicleAdjuster::ApplyReflection()
 {
     MemPutFast<DWORD>((void*)VAR_DefaultVehicleStore, VAR_DefaultVehicleCapacity);
-    MemCpyFast((void*)(VAR_DefaultVehicleStore + 4), store.m_pData, VAR_DefaultVehicleCapacity*Size_CVehicleModelInfo_SA);
+    MemCpyFast((void*)(VAR_DefaultVehicleStore + 4), store.m_pData, VAR_DefaultVehicleCapacity * Size_CVehicleModelInfo_SA);
 }
 
 void CVehicleAdjuster::AddVehicleModel(DWORD dwModel)

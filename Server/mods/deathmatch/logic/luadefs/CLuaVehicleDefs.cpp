@@ -70,6 +70,7 @@ void CLuaVehicleDefs::LoadFunctions()
         {"setVehicleTurnVelocity", SetVehicleTurnVelocity},
         {"setVehicleColor", SetVehicleColor},
         {"setVehicleLandingGearDown", SetVehicleLandingGearDown},
+        {"setVehicleMaxPassengers", SetVehicleMaxPassengers},
         {"setVehicleLocked", SetVehicleLocked},
         {"setVehicleDoorsUndamageable", SetVehicleDoorsUndamageable},
         {"setVehicleSirensOn", SetVehicleSirensOn},
@@ -3005,6 +3006,31 @@ int CLuaVehicleDefs::SetVehiclePlateText(lua_State* luaVM)
     if (!argStream.HasErrors())
     {
         if (CStaticFunctionDefinitions::SetVehiclePlateText(pElement, strText))
+        {
+            lua_pushboolean(luaVM, true);
+            return 1;
+        }
+    }
+    else
+        m_pScriptDebugging->LogCustom(luaVM, argStream.GetFullErrorMessage());
+
+    lua_pushboolean(luaVM, false);
+    return 1;
+}
+
+int CLuaVehicleDefs::SetVehicleMaxPassengers(lua_State* luaVM)
+{
+    // bool setMaxPassengerCount ( int modelID, int iCount )
+    unsigned long   ulModel;
+    uchar           ucWindow;
+
+    CScriptArgReader argStream(luaVM);
+    argStream.ReadNumber(ulModel);
+    argStream.ReadNumber(ucWindow);
+
+    if (!argStream.HasErrors())
+    {
+        if (CStaticFunctionDefinitions::SetVehicleMaxPassengerCount(ulModel, ucWindow))
         {
             lua_pushboolean(luaVM, true);
             return 1;

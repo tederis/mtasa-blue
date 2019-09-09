@@ -10,8 +10,9 @@
  *****************************************************************************/
 
 #include "StdInc.h"
+#include "CVehicleManager.h"
 
-static const SFixedArray<unsigned char, 212> g_ucMaxPassengers = {{3, 1,   1,   1,   3,   3, 0,   1,  1, 3, 1, 1,   1, 3, 1, 1,            // 400->415
+static SFixedArray<unsigned char, 212> g_ucMaxPassengers = {{3, 1,   1,   1,   3,   3, 0,   1,  1, 3, 1, 1,   1, 3, 1, 1,            // 400->415
                                                                    3, 1,   3,   1,   3,   3, 1,   1,  1, 0, 3, 3,   3, 1, 0, 8,            // 416->431
                                                                    0, 1,   1,   255, 1,   8, 3,   1,  3, 0, 1, 1,   1, 3, 0, 1,            // 432->447
                                                                    0, 1,   255, 1,   0,   0, 0,   1,  1, 1, 3, 3,   1, 1, 1,               // 448->462
@@ -25,6 +26,8 @@ static const SFixedArray<unsigned char, 212> g_ucMaxPassengers = {{3, 1,   1,   
                                                                    1, 0,   1,   1,   1,   1, 3,   3,  1, 3, 0, 255, 3, 1, 1, 1,            // 573->588
                                                                    1, 255, 255, 1,   1,   1, 0,   3,  3, 3, 1, 1,   1, 1, 1,               // 589->604
                                                                    3, 1,   255, 255, 255, 3, 255, 255}};                                   // 605->611
+
+SFixedArray<unsigned char, 1118> g_ucMaxExtraPassengers = {};
 
 // List over all vehicles with their special attributes
 #define VEHICLE_HAS_TURRENT 0x001UL                        // 1
@@ -452,7 +455,9 @@ bool CVehicleManager::IsValidUpgrade(unsigned short usUpgrade)
 unsigned int CVehicleManager::GetMaxPassengers(unsigned int uiVehicleModel)
 {
     if (IsExtraModel(uiVehicleModel))
-        return 2;
+    {
+        return g_ucMaxExtraPassengers[uiVehicleModel - 11682];
+    }
 
     if (IsValidModel(uiVehicleModel))
     {
@@ -460,6 +465,25 @@ unsigned int CVehicleManager::GetMaxPassengers(unsigned int uiVehicleModel)
     }
 
     return 0xFF;
+}
+
+bool CVehicleManager::SetMaxPassengerCount(unsigned long ulModel, unsigned char ucMaxCount)
+{
+    if (IsExtraModel(ulModel))
+    {
+        g_ucMaxExtraPassengers[ulModel - 11682] = ucMaxCount;
+
+        return true;
+    }
+
+    if (IsOriginalModel(ulModel))
+    {        
+        g_ucMaxPassengers[ulModel - 400] = ucMaxCount;
+
+        return true;
+    }
+
+    return false;
 }
 
 void CVehicleManager::GetRandomVariation(unsigned short usModel, unsigned char& ucVariant, unsigned char& ucVariant2)

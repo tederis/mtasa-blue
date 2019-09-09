@@ -254,6 +254,7 @@ public:
     static bool  GetVehicleOverrideLights(CVehicle* pVehicle, unsigned char& ucLights);
     static bool  GetVehiclePaintjob(CVehicle* pVehicle, unsigned char& ucPaintjob);
     static bool  GetVehiclePlateText(CVehicle* pVehicle, char* szPlateText);
+    static bool  SetVehicleMaxPassengerCount(unsigned long ulModel, unsigned char cCount);
     static bool  IsVehicleDamageProof(CVehicle* pVehicle, bool& bDamageProof);
     static bool  IsVehicleFuelTankExplodable(CVehicle* pVehicle, bool& bExplodable);
     static bool  IsVehicleFrozen(CVehicle* pVehicle, bool& bFrozen);

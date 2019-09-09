@@ -85,6 +85,7 @@ public:
     LUA_DECLARE(SetVehicleTurnVelocity);
     LUA_DECLARE(SetVehicleColor);
     LUA_DECLARE(SetVehicleLandingGearDown);
+    LUA_DECLARE(SetVehicleMaxPassengers);
     LUA_DECLARE(SetVehicleLocked);
     LUA_DECLARE(SetVehicleModel);
     LUA_DECLARE(SetVehicleDoorsUndamageable);
@@ -134,7 +135,7 @@ public:
     LUA_DECLARE(SetVehicleNitroLevel);
     LUA_DECLARE(SetVehiclePlateText);
     LUA_DECLARE(SetHeliBladeCollisionsEnabled);
-    LUA_DECLARE(SetVehicleWindowOpen);
+    LUA_DECLARE(SetVehicleWindowOpen);    
 
     LUA_DECLARE(SetVehicleModelDummyPosition);
     LUA_DECLARE_OOP(GetVehicleModelDummyPosition)

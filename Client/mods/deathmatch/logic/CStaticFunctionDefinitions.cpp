@@ -10,6 +10,7 @@
  *****************************************************************************/
 
 #include "StdInc.h"
+#include "CStaticFunctionDefinitions.h"
 
 using std::list;
 
@@ -3519,6 +3520,11 @@ bool CStaticFunctionDefinitions::GetHeliBladeCollisionsEnabled(CClientVehicle& V
 bool CStaticFunctionDefinitions::SetVehicleWindowOpen(CClientVehicle& Vehicle, uchar ucWindow, bool bOpen)
 {
     return Vehicle.SetWindowOpen(ucWindow, bOpen);
+}
+
+bool CStaticFunctionDefinitions::SetVehicleMaxPassengerCount(unsigned long ulModel, unsigned char cCount)
+{
+    return CClientVehicleManager::SetMaxPassengerCount(ulModel, cCount);;
 }
 
 bool CStaticFunctionDefinitions::IsVehicleWindowOpen(CClientVehicle& Vehicle, uchar ucWindow)

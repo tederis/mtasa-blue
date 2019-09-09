@@ -5032,6 +5032,11 @@ bool CStaticFunctionDefinitions::SetVehiclePlateText(CElement* pElement, const S
     return false;
 }
 
+bool CStaticFunctionDefinitions::SetVehicleMaxPassengerCount(unsigned long ulModel, unsigned char cCount)
+{
+    return CVehicleManager::SetMaxPassengerCount(ulModel, cCount);
+}
+
 bool CStaticFunctionDefinitions::IsVehicleDamageProof(CVehicle* pVehicle, bool& bDamageProof)
 {
     assert(pVehicle);
