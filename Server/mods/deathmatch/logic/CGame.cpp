@@ -499,7 +499,7 @@ void CGame::UpdatePendingPlayers(long long llDt)
         auto& entry = *it;
 
         entry.ulTimeElapsed += llDt;
-        if (entry.ulTimeElapsed > 10000)
+        if (entry.ulTimeElapsed > 40000)
         {
             if (!entry.m_pPlayer->IsMagicValid())
             {
