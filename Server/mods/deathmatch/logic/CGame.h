@@ -194,6 +194,8 @@ public:
 
     void DoPulse();
 
+    void UpdatePendingPlayers(long long llDt);
+
     bool Start(int iArgumentCount, char* szArguments[]);
     void Stop();
 
@@ -465,6 +467,7 @@ private:
 
     void Packet_PlayerJoin(const NetServerPlayerID& Source);
     void Packet_PlayerJoinData(class CPlayerJoinDataPacket& Packet);
+    void Packet_PlayerJoinMagic(class CPlayerJoinMagicPacket& Packet);
     void Packet_PedWasted(class CPedWastedPacket& Packet);
     void Packet_PlayerWasted(class CPlayerWastedPacket& Packet);
     void Packet_PlayerQuit(class CPlayerQuitPacket& Packet);
@@ -496,7 +499,7 @@ private:
     void Packet_PlayerNoSocket(class CPlayerNoSocketPacket& Packet);
     void Packet_PlayerNetworkStatus(class CPlayerNetworkStatusPacket& Packet);
 
-    static void PlayerCompleteConnect(CPlayer* pPlayer);
+    void PlayerCompleteConnect(CPlayer* pPlayer);
 
     // Technically, this could be put somewhere else.  It's a callback function
     // which the voice server library will call to send out data.
@@ -644,4 +647,14 @@ private:
     SharedUtil::CAsyncTaskScheduler* m_pAsyncTaskScheduler;
 
     bool m_DevelopmentModeEnabled;
+
+    struct PlayerEntry
+    {
+        CPlayer* m_pPlayer;
+        unsigned long ulTimeElapsed;
+    };
+
+    std::list<PlayerEntry> m_PendingPlayers;
+
+    unsigned long m_ulMagic;
 };

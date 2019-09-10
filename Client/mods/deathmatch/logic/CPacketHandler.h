@@ -56,6 +56,7 @@ public:
     bool ProcessPacket(unsigned char ucPacketID, NetBitStreamInterface& bitStream);
 
     void Packet_ServerConnected(NetBitStreamInterface& bitStream);
+    void Packet_ServerMagic(NetBitStreamInterface& bitStream);
     void Packet_ServerJoined(NetBitStreamInterface& bitStream);
     void Packet_ServerDisconnected(NetBitStreamInterface& bitStream);
     void Packet_PlayerList(NetBitStreamInterface& bitStream);

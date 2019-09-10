@@ -29,7 +29,7 @@ using std::list;
 using std::vector;
 
 // Hide the "conversion from 'unsigned long' to 'DWORD*' of greater size" warning
-#pragma warning(disable:4312)
+#pragma warning(disable : 4312)
 
 // Used within this file by the packet handler to grab the this pointer of CClientGame
 extern CClientGame* g_pClientGame;
@@ -41,15 +41,15 @@ bool                g_bBulletFireVectorsValid;
 CVector             g_vecBulletFireStartPosition;
 CVector             g_vecBulletFireEndPosition;
 
-#define DEFAULT_GRAVITY              0.008f
-#define DEFAULT_GAME_SPEED           1.0f
-#define DEFAULT_BLUR_LEVEL           36
-#define DEFAULT_JETPACK_MAXHEIGHT    100
-#define DEFAULT_AIRCRAFT_MAXHEIGHT   800
+#define DEFAULT_GRAVITY 0.008f
+#define DEFAULT_GAME_SPEED 1.0f
+#define DEFAULT_BLUR_LEVEL 36
+#define DEFAULT_JETPACK_MAXHEIGHT 100
+#define DEFAULT_AIRCRAFT_MAXHEIGHT 800
 #define DEFAULT_AIRCRAFT_MAXVELOCITY 1.5f
-#define DEFAULT_MINUTE_DURATION      1000
-#define DOUBLECLICK_TIMEOUT          330
-#define DOUBLECLICK_MOVE_THRESHOLD   10.0f
+#define DEFAULT_MINUTE_DURATION 1000
+#define DOUBLECLICK_TIMEOUT 330
+#define DOUBLECLICK_MOVE_THRESHOLD 10.0f
 
 CClientGame::CClientGame(bool bLocalPlay)
 {
@@ -107,6 +107,8 @@ CClientGame::CClientGame(bool bLocalPlay)
 
     m_bIsPlayingBack = false;
     m_bFirstPlaybackFrame = false;
+
+    m_bMagicPending = false;
 
     // Setup game glitch defaults ( false = disabled ).  Remember to update these serverside if you alter them!
     m_Glitches[GLITCH_QUICKRELOAD] = false;
@@ -319,17 +321,17 @@ CClientGame::CClientGame(bool bLocalPlay)
 
     m_bBeingDeleted = false;
 
-    #if defined (MTA_DEBUG) || defined (MTA_BETA)
+#if defined(MTA_DEBUG) || defined(MTA_BETA)
     m_bShowSyncingInfo = false;
-    #endif
+#endif
 
-    #ifdef MTA_DEBUG
+#ifdef MTA_DEBUG
     m_pShowPlayer = m_pShowPlayerTasks = NULL;
     m_bMimicLag = false;
     m_ulLastMimicLag = 0;
     m_bDoPaintballs = false;
     m_bShowInterpolation = false;
-    #endif
+#endif
 
     // Add our lua events
     AddBuiltInEvents();
@@ -377,8 +379,8 @@ CClientGame::~CClientGame()
     // Reset CGUI's global events
     g_pCore->GetGUI()->ClearInputHandlers(INPUT_MOD);
 
-    // Destroy mimics
-    #ifdef MTA_DEBUG
+// Destroy mimics
+#ifdef MTA_DEBUG
     list<CClientPlayer*>::const_iterator iterMimics = m_Mimics.begin();
     for (; iterMimics != m_Mimics.end(); iterMimics++)
     {
@@ -389,7 +391,7 @@ CClientGame::~CClientGame()
 
         delete pPlayer;
     }
-    #endif
+#endif
 
     // Hide the transfer box incase it is showing
     m_pTransferBox->Hide();
@@ -563,6 +565,7 @@ void CClientGame::StartPlayback()
 bool CClientGame::StartGame(const char* szNick, const char* szPassword, eServerType Type)
 {
     m_ServerType = Type;
+    m_bMagicPending = false;
     // int dbg = _CrtSetDbgFlag ( _CRTDBG_REPORT_FLAG );
     // dbg |= _CRTDBG_ALLOC_MEM_DF;
     // dbg |= _CRTDBG_CHECK_ALWAYS_DF;
@@ -767,7 +770,7 @@ void CClientGame::DoPulsePreHUDRender(bool bDidUnminimize, bool bDidRecreateRend
 void CClientGame::DoPulsePostFrame()
 {
     TIMING_CHECKPOINT("+CClientGame::DoPulsePostFrame");
-    #ifdef DEBUG_KEYSTATES
+#ifdef DEBUG_KEYSTATES
     // Get the controller state
     CControllerState cs;
     g_pGame->GetPad()->GetCurrentControllerState(&cs);
@@ -805,7 +808,7 @@ void CClientGame::DoPulsePostFrame()
         cs.m_bVehicleMouseLook, cs.LeftStickX, cs.LeftStickY, cs.RightStickX, cs.RightStickY);
 
     g_pCore->GetGraphics()->DrawTextTTF(300, 320, 1280, 800, 0xFFFFFFFF, strBuffer, 1.0f, 0);
-    #endif
+#endif
 
     UpdateModuleTickCount64();
 
@@ -874,7 +877,7 @@ void CClientGame::DoPulsePostFrame()
             g_pMultiplayer->GetLimits()->SetStreamingMemory(iStreamingMemoryBytes);
 
             // If we're in debug mode and are supposed to show task data, do it
-        #ifdef MTA_DEBUG
+#ifdef MTA_DEBUG
         if (m_pShowPlayerTasks)
         {
             DrawTasks(m_pShowPlayerTasks);
@@ -892,9 +895,9 @@ void CClientGame::DoPulsePostFrame()
             if (pPlayer->IsStreamedIn() && pPlayer->IsShowingWepdata())
                 DrawWeaponsyncData(pPlayer);
         }
-        #endif
+#endif
 
-        #if defined (MTA_DEBUG) || defined (MTA_BETA)
+#if defined(MTA_DEBUG) || defined(MTA_BETA)
         if (m_bShowSyncingInfo)
         {
             // Draw the header boxz
@@ -914,7 +917,7 @@ void CClientGame::DoPulsePostFrame()
                 m_pDisplayManager->DrawText2D(strBuffer, vecPosition, 1.0f, 0xFFFFFFFF);
             }
         }
-        #endif
+#endif
         // Heli Clear time
         if (m_LastClearTime.Get() > HeliKill_List_Clear_Rate)
         {
@@ -1029,6 +1032,21 @@ void CClientGame::DoPulses()
     }
 
     // Pulse the network interface
+    if (m_bMagicPending && g_pNet->IsConnected())
+    {
+        // Send the magic to the server
+        NetBitStreamInterface* pBitStream = g_pNet->AllocateNetBitStream();
+        if (pBitStream)
+        {
+            pBitStream->Write(m_ulMagic);
+
+            // Send the packet as joindata
+            g_pNet->SendPacket(PACKET_ID_PLAYER_JOINMAGIC, pBitStream, PACKET_PRIORITY_HIGH, PACKET_RELIABILITY_RELIABLE_ORDERED);
+            g_pNet->DeallocateNetBitStream(pBitStream);
+        }
+
+        m_bMagicPending = false;
+    }
 
     // Extrapolation test - Change the pulse order to reduce latency (Has side effects for peds)
     DoPulses2(false);
@@ -1044,9 +1062,9 @@ void CClientGame::DoPulses()
 
     GetModelCacheManager()->DoPulse();
 
-    #ifdef MTA_DEBUG
+#ifdef MTA_DEBUG
     UpdateMimics();
-    #endif
+#endif
 
     // Grab the current time
     unsigned long ulCurrentTime = CClientTime::GetTime();
@@ -3616,7 +3634,7 @@ void CClientGame::SetupGlobalLuaEvents()
         CWebViewInterface* pFocusedBrowser = g_pCore->IsWebCoreLoaded() ? g_pCore->GetWebCore()->GetFocusedWebView() : nullptr;
         if (pFocusedBrowser && !pFocusedBrowser->IsLocal())
             return;
-        
+
         // Call event now
         CLuaArguments args;
         args.PushString(clipboardText);
@@ -4179,13 +4197,13 @@ bool CClientGame::ProcessCollisionHandler(CEntitySAInterface* pThisInterface, CE
 
                 if (pEntity && pColEntity)
                 {
-                    #if MTA_DEBUG
+#if MTA_DEBUG
                     CClientEntity* ppThisEntity2 = iter1->second;
                     CClientEntity* ppOtherEntity2 = iter2->second;
                     // These should match, but its not essential.
                     assert(ppThisEntity2 == pEntity);
                     assert(ppOtherEntity2 == pColEntity);
-                    #endif
+#endif
                     if (!pEntity->IsCollidableWith(pColEntity))
                         return false;
                 }
@@ -5501,6 +5519,12 @@ bool CClientGame::StaticProcessPacket(unsigned char ucPacketID, NetBitStreamInte
     }
 
     return false;
+}
+
+void CClientGame::OnMagicRecieved(unsigned long ulMagic)
+{
+    m_ulMagic = ulMagic;
+    m_bMagicPending = true;
 }
 
 void CClientGame::SendExplosionSync(const CVector& vecPosition, eExplosionType Type, CClientEntity* pOrigin)

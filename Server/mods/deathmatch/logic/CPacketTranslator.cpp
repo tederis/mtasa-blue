@@ -34,6 +34,10 @@ CPacket* CPacketTranslator::Translate(const NetServerPlayerID& Socket, ePacketID
             pTemp = new CPlayerJoinDataPacket;
             break;
 
+        case PACKET_ID_PLAYER_JOINMAGIC:
+            pTemp = new CPlayerJoinMagicPacket;
+            break;
+
         case PACKET_ID_PED_WASTED:
             pTemp = new CPedWastedPacket;
             break;

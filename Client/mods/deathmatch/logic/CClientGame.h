@@ -584,6 +584,8 @@ private:
 public:
     static bool StaticProcessPacket(unsigned char ucPacketID, NetBitStreamInterface& bitStream);
 
+    void OnMagicRecieved(unsigned long ulMagic);
+
     bool ApplyPedDamageFromGame(eWeaponType weaponType, float fDamage, uchar ucHitZone, CClientPed* pDamagedPed, CClientEntity* pInflictingEntity,
                                 CEventDamage* pEvent);
 
@@ -833,6 +835,9 @@ private:
     std::set<SString> m_AllowKeyUpMap;
     uint              m_uiPrecisionCallDepth;
     SString           m_strFileCacheRoot;
+
+    unsigned long     m_ulMagic;
+    bool              m_bMagicPending;
 
     SharedUtil::CAsyncTaskScheduler* m_pAsyncTaskScheduler;
 

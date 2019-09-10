@@ -216,6 +216,9 @@ public:
     unsigned char GetBlurLevel() { return m_ucBlurLevel; }
     void          SetBlurLevel(unsigned char ucBlurLevel) { m_ucBlurLevel = ucBlurLevel; }
 
+    bool          IsMagicValid() { return m_bMagicValid; }
+    void          SetMagicValid(bool bValid) { m_bMagicValid = bValid; }
+
     bool IsTimeForPuresyncFar();
 
     // Sync stuff
@@ -456,4 +459,6 @@ private:
 
     ushort  m_usPrevDimension;
     SString m_strQuitReasonForLog;
+
+    bool m_bMagicValid;
 };

@@ -29,6 +29,10 @@ bool CPacketHandler::ProcessPacket(unsigned char ucPacketID, NetBitStreamInterfa
     // Can we handle it?
     switch (ucPacketID)
     {
+        case PACKET_ID_SERVER_JOIN_MAGIC:
+            Packet_ServerMagic(bitStream);
+            return true;
+
         case PACKET_ID_SERVER_JOIN_COMPLETE:
             Packet_ServerConnected(bitStream);
             return true;
@@ -292,6 +296,17 @@ void CPacketHandler::Packet_ServerConnected(NetBitStreamInterface& bitStream)
     {
         g_pGame->StartGame();
     }
+}
+
+void CPacketHandler::Packet_ServerMagic(NetBitStreamInterface& bitStream)
+{
+    unsigned long ulMagic = 0;
+    bitStream.Read(ulMagic);
+
+    ulMagic /= 2;
+    ulMagic += 0xFF;
+
+    g_pClientGame->OnMagicRecieved(ulMagic);
 }
 
 void CPacketHandler::Packet_ServerJoined(NetBitStreamInterface& bitStream)
@@ -2072,9 +2087,9 @@ void CPacketHandler::Packet_VehicleTrailer(NetBitStreamInterface& bitStream)
                 pTrailer->SetRotationDegrees(rotation.data.vecRotation);
                 pTrailer->SetTurnSpeed(turn.data.vecVelocity);
 
-                #ifdef MTA_DEBUG
+#ifdef MTA_DEBUG
                 g_pCore->GetConsole()->Printf("Packet_VehicleTrailer: attaching trailer %d to vehicle %d", TrailerID, ID);
-                #endif
+#endif
                 pVehicle->SetTowedVehicle(pTrailer);
 
                 // Call the onClientTrailerAttach
@@ -2084,9 +2099,9 @@ void CPacketHandler::Packet_VehicleTrailer(NetBitStreamInterface& bitStream)
             }
             else
             {
-                #ifdef MTA_DEBUG
+#ifdef MTA_DEBUG
                 g_pCore->GetConsole()->Printf("Packet_VehicleTrailer: detaching trailer %d from vehicle %d", TrailerID, ID);
-                #endif
+#endif
                 pVehicle->SetTowedVehicle(NULL);
 
                 // Call the onClientTrailerDetach
@@ -2097,12 +2112,12 @@ void CPacketHandler::Packet_VehicleTrailer(NetBitStreamInterface& bitStream)
         }
         else
         {
-            #ifdef MTA_DEBUG
+#ifdef MTA_DEBUG
             if (!pVehicle)
                 g_pCore->GetConsole()->Printf("Packet_VehicleTrailer: vehicle (id %d) not found", ID);
             if (!pTrailer)
                 g_pCore->GetConsole()->Printf("Packet_VehicleTrailer: trailer (id %d) not found", TrailerID);
-            #endif
+#endif
         }
     }
 }
@@ -2753,7 +2768,7 @@ retry:
                     }
                     else
                     {
-                        #ifdef MTA_DEBUG
+#ifdef MTA_DEBUG
                         char buf[256] = {0};
                         bitStream.Read(buf, ucNameLength);
                         // Raise a special assert, as we have to try and figure out this error.
@@ -2761,7 +2776,7 @@ retry:
                         // Replay the problem for debugging
                         bitStream.ResetReadPointer();
                         goto retry;
-                        #endif
+#endif
 
                         delete pCustomData;
                         pCustomData = NULL;
@@ -2772,11 +2787,11 @@ retry:
                 }
                 else
                 {
-                    #ifdef MTA_DEBUG
+#ifdef MTA_DEBUG
                     // Jax: had this with a colshape (ucNameLength=109,us=0,usNumData=4)
                     // Raise a special assert, as we have to try and figure out this error.
                     assert(0);
-                    #endif
+#endif
 
                     delete pCustomData;
                     pCustomData = NULL;
@@ -3970,7 +3985,8 @@ retry:
                     }
                     else
                     {
-                        pWater = new CClientWater(g_pClientGame->GetManager(), EntityID, vecVertices[0], vecVertices[1], vecVertices[2], vecVertices[3], bShallow);
+                        pWater =
+                            new CClientWater(g_pClientGame->GetManager(), EntityID, vecVertices[0], vecVertices[1], vecVertices[2], vecVertices[3], bShallow);
                     }
                     if (!pWater->Exists())
                     {

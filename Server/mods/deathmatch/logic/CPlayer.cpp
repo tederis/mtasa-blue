@@ -102,6 +102,8 @@ CPlayer::CPlayer(CPlayerManager* pPlayerManager, class CScriptDebugging* pScript
     m_LastReceivedSyncTimer.SetUseModuleTickCount(true);
     m_ConnectedTimer.SetUseModuleTickCount(true);
     m_bIsLeavingServer = false;
+
+    m_bMagicValid = false;
 }
 
 CPlayer::~CPlayer()

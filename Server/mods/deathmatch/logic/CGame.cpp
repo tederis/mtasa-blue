@@ -16,20 +16,21 @@
 #include "../utils/CFunctionUseLogger.h"
 #include "net/SimHeaders.h"
 #include <signal.h>
+#include <random>
 
 #define MAX_BULLETSYNC_DISTANCE 400.0f
 #define MAX_EXPLOSION_SYNC_DISTANCE 400.0f
 #define MAX_PROJECTILE_SYNC_DISTANCE 400.0f
 
-#define RELEASE_MIN_CLIENT_VERSION              "1.4.0-0.00000"
-#define BULLET_SYNC_MIN_CLIENT_VERSION          "1.3.0-9.04311"
-#define VEH_EXTRAPOLATION_MIN_CLIENT_VERSION    "1.3.0-9.04460"
-#define ALT_PULSE_ORDER_MIN_CLIENT_VERSION      "1.3.1-9.04913"
-#define HIT_ANIM_CLIENT_VERSION                 "1.3.2"
-#define SNIPER_BULLET_SYNC_MIN_CLIENT_VERSION   "1.3.5-9.06054"
-#define SPRINT_FIX_MIN_CLIENT_VERSION           "1.3.5-9.06277"
-#define DRIVEBY_HITBOX_FIX_MIN_CLIENT_VERSION   "1.4.0-5.06399"
-#define SHOTGUN_DAMAGE_FIX_MIN_CLIENT_VERSION   "1.5.1"
+#define RELEASE_MIN_CLIENT_VERSION "1.4.0-0.00000"
+#define BULLET_SYNC_MIN_CLIENT_VERSION "1.3.0-9.04311"
+#define VEH_EXTRAPOLATION_MIN_CLIENT_VERSION "1.3.0-9.04460"
+#define ALT_PULSE_ORDER_MIN_CLIENT_VERSION "1.3.1-9.04913"
+#define HIT_ANIM_CLIENT_VERSION "1.3.2"
+#define SNIPER_BULLET_SYNC_MIN_CLIENT_VERSION "1.3.5-9.06054"
+#define SPRINT_FIX_MIN_CLIENT_VERSION "1.3.5-9.06277"
+#define DRIVEBY_HITBOX_FIX_MIN_CLIENT_VERSION "1.4.0-5.06399"
+#define SHOTGUN_DAMAGE_FIX_MIN_CLIENT_VERSION "1.5.1"
 
 CGame* g_pGame = NULL;
 
@@ -204,6 +205,12 @@ CGame::CGame() : m_FloodProtect(4, 30000, 30000)            // Max of 4 connecti
 
     // init our mutex
     pthread_mutex_init(&mutexhttp, NULL);
+
+    std::random_device                           rd;
+    std::mt19937                                 rng(rd());
+    std::uniform_int_distribution<unsigned long> uni(1024, 4194304);
+
+    m_ulMagic = static_cast<unsigned long>(floor((float)uni(rng) / 2.0f)) * 2;
 }
 
 void CGame::ResetMapInfo()
@@ -331,14 +338,14 @@ CGame::~CGame()
     // Clear our global pointer
     g_pGame = NULL;
 
-    // Remove our console control handler
-    #ifdef WIN32
+// Remove our console control handler
+#ifdef WIN32
     SetConsoleCtrlHandler(ConsoleEventHandler, FALSE);
-    #else
+#else
     signal(SIGTERM, SIG_DFL);
     signal(SIGINT, SIG_DFL);
     signal(SIGPIPE, SIG_DFL);
-    #endif
+#endif
 }
 
 void CGame::GetTag(char* szInfoTag, int iInfoTag)
@@ -387,6 +394,8 @@ void CGame::DoPulse()
         m_usFPS = m_usFrames;
         m_usFrames = 0;
         m_llLastFPSTime = llCurrentTime;
+
+        UpdatePendingPlayers(ulDiff);
     }
     m_usFrames++;
 
@@ -483,6 +492,31 @@ void CGame::DoPulse()
     Unlock();
 }
 
+void CGame::UpdatePendingPlayers(long long llDt)
+{
+    for (auto it = m_PendingPlayers.begin(); it != m_PendingPlayers.end();)
+    {
+        auto& entry = *it;
+
+        entry.ulTimeElapsed += llDt;
+        if (entry.ulTimeElapsed > 10000)
+        {
+            if (!entry.m_pPlayer->IsMagicValid())
+            {
+                // Tell the console
+                CLogger::LogPrintf("DISCONNECT: %s disconnected(Magic timeout)\n", entry.m_pPlayer->GetNick());
+
+                // Disconnect the player
+                DisconnectPlayer(g_pGame, *entry.m_pPlayer, CPlayerDisconnectedPacket::NO_REASON);
+            }
+
+            it = m_PendingPlayers.erase(it);
+        }
+        else
+            ++it;
+    }
+}
+
 bool CGame::Start(int iArgumentCount, char* szArguments[])
 {
     // Init
@@ -519,8 +553,8 @@ bool CGame::Start(int iArgumentCount, char* szArguments[])
     m_pRegisteredCommands = new CRegisteredCommands(m_pACLManager);
     m_pLuaManager = new CLuaManager(m_pObjectManager, m_pPlayerManager, m_pVehicleManager, m_pBlipManager, m_pRadarAreaManager, m_pRegisteredCommands,
                                     m_pMapManager, &m_Events);
-    m_pConsole = new CConsole(m_pBlipManager, m_pMapManager, m_pPlayerManager, m_pRegisteredCommands, m_pVehicleManager, m_pLuaManager,
-                              m_pBanManager, m_pACLManager);
+    m_pConsole =
+        new CConsole(m_pBlipManager, m_pMapManager, m_pPlayerManager, m_pRegisteredCommands, m_pVehicleManager, m_pLuaManager, m_pBanManager, m_pACLManager);
     m_pMainConfig = new CMainConfig(m_pConsole, m_pLuaManager);
     m_pRPCFunctions = new CRPCFunctions;
 
@@ -581,9 +615,9 @@ bool CGame::Start(int iArgumentCount, char* szArguments[])
     // Encrypt crash dumps for uploading
     HandleCrashDumpEncryption();
 
-    // Check Windows server is using correctly compiled Lua dll
-    #ifndef MTA_DEBUG
-        #ifdef WIN32
+// Check Windows server is using correctly compiled Lua dll
+#ifndef MTA_DEBUG
+#ifdef WIN32
     HMODULE hModule = LoadLibrary("lua5.1.dll");
     // Release server should not have this function
     PVOID pFunc = static_cast<PVOID>(GetProcAddress(hModule, "luaX_is_apicheck_enabled"));
@@ -593,8 +627,8 @@ bool CGame::Start(int iArgumentCount, char* szArguments[])
         CLogger::ErrorPrintf("Problem with Lua dll\n");
         return false;
     }
-        #endif
-    #endif
+#endif
+#endif
 
     // Read some settings
     m_pACLManager->SetFileName(m_pMainConfig->GetAccessControlListFile().c_str());
@@ -801,16 +835,16 @@ bool CGame::Start(int iArgumentCount, char* szArguments[])
 
     m_pPlayerManager->SetScriptDebugging(m_pScriptDebugging);
 
-    // Set our console control handler
-    #ifdef WIN32
+// Set our console control handler
+#ifdef WIN32
     SetConsoleCtrlHandler(ConsoleEventHandler, TRUE);
-    // Hide the close box
-    // DeleteMenu ( GetSystemMenu ( GetConsoleWindow(), FALSE ), SC_CLOSE, MF_BYCOMMAND );
-    #else
+// Hide the close box
+// DeleteMenu ( GetSystemMenu ( GetConsoleWindow(), FALSE ), SC_CLOSE, MF_BYCOMMAND );
+#else
     signal(SIGTERM, &sighandler);
     signal(SIGINT, &sighandler);
     signal(SIGPIPE, SIG_IGN);
-    #endif
+#endif
 
     // Add our builtin events
     AddBuiltInEvents();
@@ -1023,6 +1057,12 @@ bool CGame::ProcessPacket(CPacket& Packet)
         case PACKET_ID_PLAYER_JOINDATA:
         {
             Packet_PlayerJoinData(static_cast<CPlayerJoinDataPacket&>(Packet));
+            return true;
+        }
+
+        case PACKET_ID_PLAYER_JOINMAGIC:
+        {
+            Packet_PlayerJoinMagic(static_cast<CPlayerJoinMagicPacket&>(Packet));
             return true;
         }
 
@@ -1357,7 +1397,7 @@ void CGame::QuitPlayer(CPlayer& Player, CClient::eQuitReasons Reason, bool bSayI
         return;
 
     Player.SetLeavingServer(true);
-    
+
     // Grab quit reaason
     const char* szReason = "Unknown";
     switch (Reason)
@@ -1643,13 +1683,13 @@ void CGame::Packet_PlayerJoinData(CPlayerJoinDataPacket& Packet)
                 strExtra = SStringX(strExtraTemp);
                 strPlayerVersion = SStringX(strPlayerVersionTemp);
             }
-        #if MTASA_VERSION_TYPE < VERSION_TYPE_UNSTABLE
+#if MTASA_VERSION_TYPE < VERSION_TYPE_UNSTABLE
             if (atoi(ExtractVersionStringBuildNumber(Packet.GetPlayerVersion())) != 0)
             {
                 // Use player version from packet if it contains a valid build number
                 strPlayerVersion = Packet.GetPlayerVersion();
             }
-        #endif
+#endif
 
             SString strIP = pPlayer->GetSourceIP();
             SString strIPAndSerial("IP: %s  Serial: %s  Version: %s", strIP.c_str(), strSerial.c_str(), strPlayerVersion.c_str());
@@ -1719,7 +1759,8 @@ void CGame::Packet_PlayerJoinData(CPlayerJoinDataPacket& Packet)
                                 }
 
                                 // Check if client should optionally update
-                                if (Packet.IsOptionalUpdateInfoRequired() && IsBelowRecommendedClient(pPlayer->GetPlayerVersion()) && !pPlayer->ShouldIgnoreMinClientVersionChecks())
+                                if (Packet.IsOptionalUpdateInfoRequired() && IsBelowRecommendedClient(pPlayer->GetPlayerVersion()) &&
+                                    !pPlayer->ShouldIgnoreMinClientVersionChecks())
                                 {
                                     // Tell the console
                                     CLogger::LogPrintf("CONNECT: %s advised to update (Client version is below recommended) (%s)\n", szNick,
@@ -1785,7 +1826,7 @@ void CGame::Packet_PlayerJoinData(CPlayerJoinDataPacket& Packet)
                                     return;
                                 }
 
-                            #if MTASA_VERSION_TYPE > VERSION_TYPE_UNSTABLE
+#if MTASA_VERSION_TYPE > VERSION_TYPE_UNSTABLE
                                 if (Packet.GetPlayerVersion().length() > 0 && Packet.GetPlayerVersion() != pPlayer->GetPlayerVersion())
                                 {
                                     // Tell the console
@@ -1795,7 +1836,7 @@ void CGame::Packet_PlayerJoinData(CPlayerJoinDataPacket& Packet)
                                     DisconnectPlayer(this, *pPlayer, CPlayerDisconnectedPacket::VERSION_MISMATCH);
                                     return;
                                 }
-                            #endif
+#endif
 
                                 PlayerCompleteConnect(pPlayer);
                             }
@@ -1881,6 +1922,28 @@ void CGame::Packet_PlayerJoinData(CPlayerJoinDataPacket& Packet)
             CLogger::LogPrintf("CONNECT: %s failed to connect (Player Element Could not be created.)\n", szNick);
         }
     }
+}
+
+void CGame::Packet_PlayerJoinMagic(CPlayerJoinMagicPacket& Packet)
+{
+    CPlayer* pPlayer = Packet.GetSourcePlayer();
+    if (!pPlayer)
+        return;
+
+    unsigned long ulMagic = m_ulMagic;
+
+    ulMagic /= 2;
+    ulMagic += 0xFF;
+
+    if (Packet.GetMagic() == ulMagic)
+    {
+        // Tell the console
+        CLogger::LogPrintf("CONNECT: %s connected (Magic accepted)\n", pPlayer->GetNick());
+
+        pPlayer->SetMagicValid(true);
+    }
+    else
+        CLogger::LogPrintf("REJECT: %s rejected (Invalid magic)\n", pPlayer->GetNick());
 }
 
 void CGame::Packet_PedWasted(CPedWastedPacket& Packet)
@@ -3919,6 +3982,15 @@ void CGame::PlayerCompleteConnect(CPlayer* pPlayer)
 
     // The player is spawned when he's connected, just the Camera is not faded in/not targetting
     pPlayer->SetSpawned(true);
+
+    PlayerEntry entry;
+    entry.m_pPlayer = pPlayer;
+    entry.ulTimeElapsed = 0;
+
+    m_PendingPlayers.push_back(std::move(entry));
+
+    // Send him the magic number
+    pPlayer->Send(CPlayerConnectMagicPacket(m_ulMagic));
 }
 
 void CGame::Lock()
@@ -4154,7 +4226,7 @@ void CGame::SendPacketBatchEnd()
 bool CGame::IsBulletSyncActive()
 {
     bool bConfigSaysEnable = m_pMainConfig->GetBulletSyncEnabled();
-#if 0       // No auto bullet sync as there are some problems with it
+#if 0            // No auto bullet sync as there are some problems with it
     bool bGlitchesSayEnable = ( m_Glitches [ GLITCH_FASTFIRE ] || m_Glitches [ GLITCH_CROUCHBUG ] );
 #else
     bool bGlitchesSayEnable = false;
