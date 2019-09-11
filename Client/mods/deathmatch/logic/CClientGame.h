@@ -412,8 +412,8 @@ public:
     bool GetDevelopmentMode() { return m_bDevelopmentMode; }
     void SetShowPhysics(bool bEnable);
     void SetShowCollision(bool bEnable) { m_bShowCollision = bEnable; }
-    bool GetShowPhysics() { return m_bShowPhysics; }
-    bool GetShowCollision() const;
+    bool GetShowPhysics() { return m_bShowPhysics; };
+    bool GetShowCollision() { return m_bShowCollision; };
     void SetShowSound(bool bEnable) { m_bShowSound = bEnable; }
     bool GetShowSound() { return m_bShowSound; }
 
