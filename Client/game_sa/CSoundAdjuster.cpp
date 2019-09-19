@@ -26,20 +26,20 @@ void _declspec(naked) HOOK_SetupCommonData()
 
 CSoundAdjusterSA::CSoundAdjusterSA()
 {
+    // Copy all the default sound properties
+    memcpy(&VehicleAudioProperties[0], (void*)0x860AF0, sizeof(VehicleAudioPropertyEntry) * 212);
+
+    // Fill the extra models
+    for (int i = 212; i < 12400; ++i)
+    {
+        memcpy(&VehicleAudioProperties[i], (void*)(0x860AF0 + sizeof(VehicleAudioPropertyEntry)*156), sizeof(VehicleAudioPropertyEntry));
+    }
+
     HookInstall(0x5B8FBE, (DWORD)HOOK_SetupCommonData, 5);
 }
 
 void CSoundAdjusterSA::Install()
 {
-    // Copy all the default sound properties
-    memcpy(VehicleAudioProperties, (void*)0x860B5C, sizeof(VehicleAudioPropertyEntry) * 212);
-
-    // Fill the extra models
-    for (int i = 11282; i < 12400; ++i)
-    {
-        memcpy(&VehicleAudioProperties[i], (void*)0x860B5C, sizeof(VehicleAudioPropertyEntry));
-    }
-
     MemPut<DWORD>((void*)0x4F5C26, (DWORD)VehicleAudioProperties);
     MemPut<DWORD>((void*)0x4F77CD, (DWORD)VehicleAudioProperties);
 }
@@ -102,4 +102,18 @@ void CSoundAdjusterSA::SetModelEngineOffSound(unsigned long ulModel, short usSou
 
     VehicleAudioPropertyEntry& entry = VehicleAudioProperties[ulIndex];
     entry.EngineOffSound = usSound;
+}
+
+void CSoundAdjusterSA::SetModelData(unsigned long ulModel, const VehicleAudioPropertyEntry&& entry)
+{
+    unsigned long ulIndex = ulModel - 400;
+    if (ulIndex >= MODEL_AUDIO_AMOUNT)
+        return; 
+
+    VehicleAudioProperties[ulIndex] = std::move(entry);
+}
+
+void CSoundAdjusterSA::GetOriginalProperties(std::vector<VehicleAudioPropertyEntry>& entries)
+{
+    entries.assign(VehicleAudioProperties, VehicleAudioProperties + 212);
 }

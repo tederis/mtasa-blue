@@ -13,7 +13,7 @@
 #include <game/CGame.h>
 #include <Accctrl.h>
 #include <Aclapi.h>
-#include "Userenv.h"        // This will enable SharedUtil::ExpandEnvString
+#include "Userenv.h"            // This will enable SharedUtil::ExpandEnvString
 #define ALLOC_STATS_MODULE_NAME "core"
 #include "SharedUtil.hpp"
 #include <clocale>
@@ -735,8 +735,8 @@ void CCore::ApplyHooks()
     // Remove useless DirectPlay dependency (dpnhpast.dll) @ 0x745701
     // We have to patch here as multiplayer_sa and game_sa are loaded too late
     using LoadLibraryA_t = HMODULE(__stdcall*)(LPCTSTR fileName);
-    static LoadLibraryA_t oldLoadLibraryA =
-        (LoadLibraryA_t)DetourFunction(DetourFindFunction("KERNEL32.DLL", "LoadLibraryA"), (PBYTE)(LoadLibraryA_t)[](LPCSTR fileName)->HMODULE {
+    static LoadLibraryA_t oldLoadLibraryA = (LoadLibraryA_t)DetourFunction(
+        DetourFindFunction("KERNEL32.DLL", "LoadLibraryA"), (PBYTE)(LoadLibraryA_t)[](LPCSTR fileName)->HMODULE {
             // Don't load dpnhpast.dll
             if (StrCmpA("dpnhpast.dll", fileName) == 0)
             {
@@ -909,6 +909,79 @@ void CCore::CreateGame()
         BrowseToSolution("downgrade", TERMINATE_PROCESS,
                          "Only GTA:SA version 1.0 is supported!\n\nYou are now being redirected to a page where you can patch your version.");
     }
+
+    auto xml = m_pXML->CreateXML(CalcMTASAPath("mta/config/modelaudio.xml"));
+    if (xml && xml->Parse())
+    {
+        auto root = xml->GetRootNode();
+
+        // Find existing node
+        for (int i = 0; true; i++)
+        {
+            CXMLNode* pNode = root->FindSubNode("model", i);
+
+            if (!pNode)
+                break;            
+
+            CXMLAttributes* pAttributes = &pNode->GetAttributes();
+
+            CXMLAttribute* pA = NULL;
+            if (pA = pAttributes->Find("model"))
+            {
+                unsigned long ulModel = atoi(pA->GetValue().c_str());
+
+                VehicleAudioPropertyEntry entry;
+
+                if (pA = pAttributes->Find("type"))
+                    entry.VehicleType = atoi(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("engineon"))
+                    entry.EngineOnSound = atoi(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("engineoff"))
+                    entry.EngineOffSound = atoi(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("field_4"))
+                    entry.field_4 = atoi(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("field_5"))
+                    entry.field_5 = atof(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("field_6"))
+                    entry.field_6 = atof(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("HornTon"))
+                    entry.HornTon = atoi(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("HornHigh"))
+                    entry.HornHigh = atof(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("DoorSound"))
+                    entry.DoorSound = atoi(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("field_11"))
+                    entry.field_11[0] = atoi(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("RadioNum"))
+                    entry.RadioNum = atoi(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("RadioType"))
+                    entry.RadioType = atoi(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("field_14"))
+                    entry.field_14 = atoi(pA->GetValue().c_str());
+
+                if (pA = pAttributes->Find("field_16"))
+                    entry.field_16 = atof(pA->GetValue().c_str());
+
+                GetGame()->GetSoundAdjuster()->SetModelData(ulModel, std::move(entry));
+            }
+        }
+
+        WriteDebugEvent("CCore::CreateGame Model audio loaded");
+
+        delete xml; 
+    }
 }
 
 void CCore::CreateMultiplayer()
@@ -1006,6 +1079,86 @@ void CCore::CreateXML()
 void CCore::DestroyGame()
 {
     WriteDebugEvent("CCore::DestroyGame");
+
+#ifdef SAVE_MODEL_SND
+    auto xml = m_pXML->CreateXML(CalcMTASAPath("mta/config/modelaudio.xml"));
+    if (xml)
+    {
+        auto root = xml->CreateRootNode("models");
+
+        std::vector<VehicleAudioPropertyEntry> entries;
+        GetGame()->GetSoundAdjuster()->GetOriginalProperties(entries);
+
+        unsigned int model = 400;
+
+        for (auto& it : entries)
+        {
+            auto            node = root->CreateSubNode("model");
+            CXMLAttributes* pAttributes = &node->GetAttributes();
+
+            CXMLAttribute* pA = NULL;
+            pA = pAttributes->Create("model");
+            pA->SetValue(model);
+
+            pA = pAttributes->Create("type");
+            pA->SetValue(it.VehicleType);
+
+            pA = pAttributes->Create("engineon");
+            pA->SetValue(it.EngineOnSound);
+
+            pA = pAttributes->Create("engineoff");
+            pA->SetValue(it.EngineOffSound);
+
+            pA = pAttributes->Create("field_4");
+            pA->SetValue(it.field_4);
+
+            pA = pAttributes->Create("field_5");
+            pA->SetValue(it.field_5);
+
+            pA = pAttributes->Create("field_6");
+            pA->SetValue(it.field_6);
+
+            pA = pAttributes->Create("HornTon");
+            pA->SetValue(it.HornTon);
+
+            pA = pAttributes->Create("field_8");
+            char buffer[100];
+            snprintf(buffer, 100, "%d %d %d", it.field_8[0], it.field_8[1], it.field_8[2]);
+            pA->SetValue(buffer);
+
+            pA = pAttributes->Create("HornHigh");
+            pA->SetValue(it.HornHigh);
+
+            pA = pAttributes->Create("DoorSound");
+            pA->SetValue(it.DoorSound);
+
+            pA = pAttributes->Create("field_11");
+            pA->SetValue(it.field_11[0]);
+
+            pA = pAttributes->Create("RadioNum");
+            pA->SetValue(it.RadioNum);
+
+            pA = pAttributes->Create("RadioType");
+            pA->SetValue(it.RadioType);
+
+            pA = pAttributes->Create("field_14");
+            pA->SetValue(it.field_14);
+
+            pA = pAttributes->Create("field_15");
+            char buffer_[100];
+            snprintf(buffer_, 100, "%d %d %d", it.field_15[0], it.field_15[1], it.field_15[2]);
+            pA->SetValue(buffer_);
+
+            pA = pAttributes->Create("field_16");
+            pA->SetValue(it.field_16);
+
+            ++model;
+        }
+
+        xml->Write();
+        delete xml;
+    }
+#endif
 
     if (m_pGame)
     {
@@ -1313,7 +1466,7 @@ void CCore::RegisterCommands()
     m_pCommands->Add("showframegraph", _("shows the frame timing graph"), CCommandFuncs::ShowFrameGraph);
     m_pCommands->Add("jinglebells", "", CCommandFuncs::JingleBells);
     m_pCommands->Add("fakelag", "", CCommandFuncs::FakeLag);
-    
+
     m_pCommands->Add("reloadnews", "for developers: reload news", CCommandFuncs::ReloadNews);
 }
 
@@ -1666,7 +1819,7 @@ void CCore::UpdateRecentlyPlayed()
 
 void CCore::ApplyCoreInitSettings()
 {
-#if (_WIN32_WINNT >= _WIN32_WINNT_LONGHORN) // Windows Vista
+#if (_WIN32_WINNT >= _WIN32_WINNT_LONGHORN)            // Windows Vista
     bool bValue;
     CVARS_GET("process_dpi_aware", bValue);
 
