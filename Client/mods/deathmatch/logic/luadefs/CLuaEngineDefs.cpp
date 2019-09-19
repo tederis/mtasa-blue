@@ -37,6 +37,7 @@ void CLuaEngineDefs::LoadFunctions()
         {"engineGetSurfaceProperties", EngineGetSurfaceProperties},
         {"engineSetSurfaceProperties", EngineSetSurfaceProperties},
         {"engineResetSurfaceProperties", EngineResetSurfaceProperties},
+        {"engineSetModelAudioProperties", EngineSetModelAudioProperties},
 
         // CLuaCFunctions::AddFunction ( "engineReplaceMatchingAtomics", EngineReplaceMatchingAtomics );
         // CLuaCFunctions::AddFunction ( "engineReplaceWheelAtomics", EngineReplaceWheelAtomics );
@@ -308,12 +309,13 @@ int CLuaEngineDefs::EngineLoadIFP(lua_State* luaVM)
             CResource* pResource = pLuaMain->GetResource();
             if (pResource)
             {
-                bool bIsRawData = CIFPEngine::IsIFPData(strFile);
+                bool    bIsRawData = CIFPEngine::IsIFPData(strFile);
                 SString strPath;
                 // Is this a legal filepath?
                 if (bIsRawData || CResourceManager::ParseResourcePathInput(strFile, pResource, &strPath))
                 {
-                    std::shared_ptr<CClientIFP> pIFP = CIFPEngine::EngineLoadIFP(pResource, m_pManager, bIsRawData ? strFile : strPath, bIsRawData, strBlockName);
+                    std::shared_ptr<CClientIFP> pIFP =
+                        CIFPEngine::EngineLoadIFP(pResource, m_pManager, bIsRawData ? strFile : strPath, bIsRawData, strBlockName);
                     if (pIFP != nullptr)
                     {
                         // Return the IFP element
@@ -1326,5 +1328,84 @@ int CLuaEngineDefs::EngineResetSurfaceProperties(lua_State* luaVM)
     else
         lua_pushboolean(luaVM, false);
 
+    return 1;
+}
+
+int CLuaEngineDefs::EngineSetModelAudioProperties(lua_State* luaVM)
+{
+    CScriptArgReader argStream(luaVM);
+
+    unsigned long ulModel;
+    argStream.ReadNumber(ulModel);
+
+    eModelAudioProperties eType;
+    argStream.ReadEnumString(eType); 
+
+    if (!argStream.HasErrors())
+    {
+        short sValue;
+        char cValue;
+        float fValue;
+
+        switch (eType)
+        {
+            case MODEL_AUDIO_TYPE:
+                argStream.ReadNumber(sValue);
+                if (!argStream.HasErrors())
+                {
+                    g_pGame->GetSoundAdjuster()->SetModelType(ulModel, sValue);
+                    lua_pushboolean(luaVM, true);
+                    return 1;
+                }
+                break;
+             case MODEL_AUDIO_ENGINE_ON:
+                argStream.ReadNumber(sValue);
+                if (!argStream.HasErrors())
+                {
+                    g_pGame->GetSoundAdjuster()->SetModelEngineOnSound(ulModel, sValue);
+                    lua_pushboolean(luaVM, true);
+                    return 1;
+                }
+                break;
+            case MODEL_AUDIO_ENGINE_OFF:
+                argStream.ReadNumber(sValue);
+                if (!argStream.HasErrors())
+                {
+                    g_pGame->GetSoundAdjuster()->SetModelEngineOffSound(ulModel, sValue);
+                    lua_pushboolean(luaVM, true);
+                    return 1;
+                }
+                break;
+            case MODEL_AUDIO_HORN_TON:
+                argStream.ReadNumber(cValue);
+                if (!argStream.HasErrors())
+                {
+                    g_pGame->GetSoundAdjuster()->SetModelHornTon(ulModel, cValue);
+                    lua_pushboolean(luaVM, true);
+                    return 1;
+                }
+                break;
+            case MODEL_AUDIO_HORN_HIGH:
+                argStream.ReadNumber(fValue);
+                if (!argStream.HasErrors())
+                {
+                    g_pGame->GetSoundAdjuster()->SetModelHornHigh(ulModel, fValue);
+                    lua_pushboolean(luaVM, true);
+                    return 1;
+                }
+                break;
+            case MODEL_AUDIO_DOOR:
+                argStream.ReadNumber(cValue);
+                if (!argStream.HasErrors())
+                {
+                    g_pGame->GetSoundAdjuster()->SetModelDoorSound(ulModel, cValue);
+                    lua_pushboolean(luaVM, true);
+                    return 1;
+                }
+                break;
+        }
+    }
+        
+    lua_pushboolean(luaVM, false);
     return 1;
 }

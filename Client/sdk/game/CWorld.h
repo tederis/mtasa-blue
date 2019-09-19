@@ -174,6 +174,16 @@ enum eSurfaceProperties
     SURFACE_PROPERTY_CREATEPLANTS,
 };
 
+enum eModelAudioProperties
+{
+    MODEL_AUDIO_TYPE,
+    MODEL_AUDIO_ENGINE_ON,
+    MODEL_AUDIO_ENGINE_OFF,
+    MODEL_AUDIO_HORN_TON,
+    MODEL_AUDIO_HORN_HIGH,
+    MODEL_AUDIO_DOOR
+};
+
 enum eSurfaceBulletEffect
 {
     SURFACE_BULLET_EFFECT_DISABLED,

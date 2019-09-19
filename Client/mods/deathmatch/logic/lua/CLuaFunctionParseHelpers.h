@@ -53,6 +53,7 @@ DECLARE_ENUM(eWheelPosition)
 DECLARE_ENUM(D3DPRIMITIVETYPE);
 DECLARE_ENUM(eVehicleDummies);
 DECLARE_ENUM(eSurfaceProperties);
+DECLARE_ENUM(eModelAudioProperties);
 DECLARE_ENUM(eSurfaceAudio);
 DECLARE_ENUM(eSurfaceBulletEffect);
 DECLARE_ENUM(eSurfaceWheelEffect);
@@ -396,6 +397,10 @@ inline SString GetClassTypeName(D3DPRIMITIVETYPE*)
 inline SString GetClassTypeName(eVehicleDummies*)
 {
     return "vehicle-dummy";
+}
+inline SString GetClassTypeName(eModelAudioProperties*)
+{
+    return "model-audio-property-type";
 }
 inline SString GetClassTypeName(eSurfaceProperties*)
 {

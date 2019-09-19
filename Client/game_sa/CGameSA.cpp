@@ -113,6 +113,8 @@ CGameSA::CGameSA()
     this->m_pWeaponStatsManager = new CWeaponStatManagerSA();
     this->m_pPointLights = new CPointLightsSA();
 
+    this->m_pSndAdjuster = new CSoundAdjusterSA();
+
     // Normal weapon types (WEAPONSKILL_STD)
     for (int i = 0; i < NUM_WeaponInfosStdSkill; i++)
     {

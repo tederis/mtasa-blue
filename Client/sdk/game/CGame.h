@@ -78,6 +78,7 @@ typedef void(InRenderer)();
 #include "CWeather.h"
 #include "CWeaponInfo.h"
 #include "CWorld.h"
+#include "CSoundAdjuster.h"
 #include "TaskCarAccessories.h"
 
 #include <windows.h>
@@ -155,6 +156,7 @@ public:
     virtual CCarEnterExit*            GetCarEnterExit() = 0;
     virtual CControllerConfigManager* GetControllerConfigManager() = 0;
     virtual CRenderWare*              GetRenderWare() = 0;
+    virtual CSoundAdjuster*           GetSoundAdjuster() = 0;
     virtual CHandlingManager*         GetHandlingManager() = 0;
     virtual CAnimManager*             GetAnimManager() = 0;
     virtual CStreaming*               GetStreaming() = 0;
