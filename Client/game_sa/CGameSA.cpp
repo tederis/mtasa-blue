@@ -192,6 +192,8 @@ CGameSA::CGameSA()
     // Increase matrix array size
     MemPut<int>(0x054F3A1, MAX_OBJECTS * 3);            // Default is 900
 
+    MemPut<__int8>(0x085C5AC, '_');                 // Temporary swinging fix
+
     CModelInfoSA::StaticSetHooks();
     CPlayerPedSA::StaticSetHooks();
     CRenderWareSA::StaticSetHooks();
