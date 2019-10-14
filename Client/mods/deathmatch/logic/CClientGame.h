@@ -83,6 +83,13 @@ public:
         STATUS_JOINED,
     };
 
+    enum eMagicStatus
+    {
+        MAGIC_PENDING,
+        MAGIC_RECIEVED,
+        MAGIC_APPROVED
+    };
+
     enum eServerType
     {
         SERVER_TYPE_NORMAL,
@@ -481,6 +488,8 @@ private:
 
     void QuitPlayer(CClientPlayer* pPlayer, eQuitReason Reason);
 
+    void OnMagicCheckTimeout();
+
     void Event_OnIngame();
     void Event_OnIngameAndConnected();
 
@@ -836,8 +845,9 @@ private:
     uint              m_uiPrecisionCallDepth;
     SString           m_strFileCacheRoot;
 
-    unsigned long     m_ulMagic;
-    bool              m_bMagicPending;
+    unsigned long           m_ulMagic;
+    eMagicStatus            m_bMagicStatus;
+    unsigned long long      m_ullMagicPendingTime;
 
     SharedUtil::CAsyncTaskScheduler* m_pAsyncTaskScheduler;
 

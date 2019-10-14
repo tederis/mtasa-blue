@@ -108,7 +108,8 @@ CClientGame::CClientGame(bool bLocalPlay)
     m_bIsPlayingBack = false;
     m_bFirstPlaybackFrame = false;
 
-    m_bMagicPending = false;
+    m_bMagicStatus = MAGIC_PENDING;
+    m_ullMagicPendingTime = GetTickCount64_();
 
     // Setup game glitch defaults ( false = disabled ).  Remember to update these serverside if you alter them!
     m_Glitches[GLITCH_QUICKRELOAD] = false;
@@ -565,7 +566,8 @@ void CClientGame::StartPlayback()
 bool CClientGame::StartGame(const char* szNick, const char* szPassword, eServerType Type)
 {
     m_ServerType = Type;
-    m_bMagicPending = false;
+    m_bMagicStatus = MAGIC_PENDING;
+    m_ullMagicPendingTime = GetTickCount64_();
     // int dbg = _CrtSetDbgFlag ( _CRTDBG_REPORT_FLAG );
     // dbg |= _CRTDBG_ALLOC_MEM_DF;
     // dbg |= _CRTDBG_CHECK_ALWAYS_DF;
@@ -1032,20 +1034,27 @@ void CClientGame::DoPulses()
     }
 
     // Pulse the network interface
-    if (m_bMagicPending && g_pNet->IsConnected())
-    {
-        // Send the magic to the server
-        NetBitStreamInterface* pBitStream = g_pNet->AllocateNetBitStream();
-        if (pBitStream)
+    if (g_pNet->IsConnected())
+    {     
+        if(m_bMagicStatus == MAGIC_RECIEVED)
         {
-            pBitStream->Write(m_ulMagic);
+            // Send the magic to the server
+            NetBitStreamInterface* pBitStream = g_pNet->AllocateNetBitStream();
+            if (pBitStream)
+            {
+                pBitStream->Write(m_ulMagic);
 
-            // Send the packet as joindata
-            g_pNet->SendPacket(PACKET_ID_PLAYER_JOINMAGIC, pBitStream, PACKET_PRIORITY_HIGH, PACKET_RELIABILITY_RELIABLE_ORDERED);
-            g_pNet->DeallocateNetBitStream(pBitStream);
+                // Send the packet as joindata
+                g_pNet->SendPacket(PACKET_ID_PLAYER_JOINMAGIC, pBitStream, PACKET_PRIORITY_HIGH, PACKET_RELIABILITY_RELIABLE_ORDERED);
+                g_pNet->DeallocateNetBitStream(pBitStream);
+            }
+
+            m_bMagicStatus = MAGIC_APPROVED;
         }
-
-        m_bMagicPending = false;
+        else if (m_bMagicStatus == MAGIC_PENDING && (GetTickCount64_() - m_ullMagicPendingTime) > 10000)
+        {
+            OnMagicCheckTimeout();
+        }
     }
 
     // Extrapolation test - Change the pulse order to reduce latency (Has side effects for peds)
@@ -3541,6 +3550,26 @@ void CClientGame::QuitPlayer(CClientPlayer* pPlayer, eQuitReason Reason)
     delete pPlayer;
 }
 
+void CClientGame::OnMagicCheckTimeout()
+{
+    if (m_bMagicStatus != MAGIC_PENDING)
+        return;
+
+    SString strReason = _("Disconnected: Magic verification failed");
+    SString strErrorCode = _E("RP01");  
+
+    // Display the error
+    g_pCore->ShowErrorMessageBox(_("Disconnected") + strErrorCode, strReason);
+
+    AddReportLog(7107, SString("Game - Disconnected (%s) (%s)", *strErrorCode, *strReason.Replace("\n", " ")));
+
+     // Terminate the mod (disconnect first in case there were more packets after this one)
+    m_bGracefulDisconnect = true;
+    g_pNet->StopNetwork();
+    g_pCore->GetModManager()->RequestUnload();
+    g_pClientGame->GetManager()->SetGameUnloadedFlag();
+}
+
 void CClientGame::Event_OnIngame()
 {
     // Unpause the game
@@ -5524,7 +5553,7 @@ bool CClientGame::StaticProcessPacket(unsigned char ucPacketID, NetBitStreamInte
 void CClientGame::OnMagicRecieved(unsigned long ulMagic)
 {
     m_ulMagic = ulMagic;
-    m_bMagicPending = true;
+    m_bMagicStatus = MAGIC_RECIEVED;
 }
 
 void CClientGame::SendExplosionSync(const CVector& vecPosition, eExplosionType Type, CClientEntity* pOrigin)

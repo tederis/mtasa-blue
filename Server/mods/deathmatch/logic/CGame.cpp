@@ -1466,6 +1466,10 @@ void CGame::QuitPlayer(CPlayer& Player, CClient::eQuitReasons Reason, bool bSayI
         }
     }
 
+    auto found = find_if(m_PendingPlayers.begin(), m_PendingPlayers.end(), [&Player](const PlayerEntry& s) { return s.m_pPlayer == &Player; });
+    if (found != m_PendingPlayers.end())
+        m_PendingPlayers.erase(found);
+
     // Tell net module connection version info will no longer be required
     g_pNetServer->ClearClientBitStreamVersion(Player.GetSocket());
 
