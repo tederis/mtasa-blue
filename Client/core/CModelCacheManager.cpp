@@ -228,8 +228,8 @@ void CModelCacheManagerImpl::DoPulse()
     //
     int iStreamingMemoryAvailableKB = *(int*)0x08A5A80;
 
-    SSamplePoint<float> pedPoints[] = {{65536, 9}, {98304, 18}, {131072, 36}, {262144, 72}};
-    SSamplePoint<float> vehPoints[] = {{65536, 7}, {98304, 28}, {131072, 56}, {262144, 56}};
+    SSamplePoint<float> pedPoints[] = {{65536, 6}, {98304, 12}, {131072, 24}, {262144, 38}};
+    SSamplePoint<float> vehPoints[] = {{65536, 2}, {98304, 8}, {131072, 12}, {262144, 18}};
 
     m_uiMaxCachedPedModels = (int)EvalSamplePosition<float>(pedPoints, NUMELMS(pedPoints), (float)iStreamingMemoryAvailableKB);
     m_uiMaxCachedVehicleModels = (int)EvalSamplePosition<float>(vehPoints, NUMELMS(vehPoints), (float)iStreamingMemoryAvailableKB);
