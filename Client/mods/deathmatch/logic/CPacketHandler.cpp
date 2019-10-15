@@ -300,13 +300,48 @@ void CPacketHandler::Packet_ServerConnected(NetBitStreamInterface& bitStream)
 
 void CPacketHandler::Packet_ServerMagic(NetBitStreamInterface& bitStream)
 {
-    unsigned long ulMagic = 0;
-    bitStream.Read(ulMagic);
+    unsigned int uiCount = 0;
+    if (bitStream.Read(uiCount) != true || uiCount == 0)
+        return;
 
-    ulMagic /= 2;
-    ulMagic += 0xFF;
+    // Parse a file list
+    std::vector<SString> fileNames;
 
-    g_pClientGame->OnMagicRecieved(ulMagic);
+    for (int i = 0; i < uiCount; ++i)
+    {
+        SString strFileName;
+        if (bitStream.ReadStr(strFileName) != true)
+            return;
+
+        fileNames.emplace_back(std::move(strFileName));
+    }
+
+    SString strBasePath = GetMTASABaseDir();
+
+    // Tell the game
+    g_pClientGame->OnMagicRecieved();
+
+    // Build a list of file hashes
+    g_pClientGame->GetAsyncTaskScheduler()->PushTask<std::vector<SString>>(
+        [fileNames, strBasePath] {
+            std::vector<SString> fileHashes;
+
+            for (const auto& strFileName : fileNames)
+            {            
+                SString strJoined = PathJoin(strBasePath, strFileName);
+                if (FileExists(strJoined))
+                    fileHashes.emplace_back(GenerateSha256HexStringFromFile(strJoined));
+                else
+                    fileHashes.push_back("none");
+            }
+
+
+            return fileHashes;
+        },
+        [](const std::vector<SString>& fileHashes) {
+            if (g_pClientGame)
+                g_pClientGame->SendMagicBack(fileHashes);
+        });
 }
 
 void CPacketHandler::Packet_ServerJoined(NetBitStreamInterface& bitStream)

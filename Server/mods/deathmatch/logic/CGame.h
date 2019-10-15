@@ -132,6 +132,8 @@ class CVehicleTrailerPacket;
 class CVoiceDataPacket;
 class CWeaponDamageCheckPacket;
 
+class CFileValidator;
+
 typedef SFixedArray<bool, MAX_GARAGES> SGarageStates;
 
 // CSendList - Can be used like a std::list of players for sending packets.
@@ -558,6 +560,8 @@ private:
     CCustomWeaponManager* m_pCustomWeaponManager;
     CFunctionUseLogger*   m_pFunctionUseLogger;
 
+    CFileValidator* m_pFileValidator;
+
     char* m_szCurrentFileName;
 
     // This client represents the console input
@@ -654,7 +658,5 @@ private:
         unsigned long ulTimeElapsed;
     };
 
-    std::list<PlayerEntry> m_PendingPlayers;
-
-    unsigned long m_ulMagic;
+    std::vector<PlayerEntry> m_PendingPlayers;
 };

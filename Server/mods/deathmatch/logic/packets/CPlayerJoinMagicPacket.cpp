@@ -14,8 +14,20 @@
 bool CPlayerJoinMagicPacket::Read(NetBitStreamInterface& BitStream)
 {
     // Read out the stuff
-    if (BitStream.Read(m_ulMagic))
-        return true;
+    if (BitStream.Read(m_uiCount) != true)
+        return false;
 
-    return false;
+    m_Hashes.clear();
+    m_Hashes.reserve(m_uiCount);
+
+    for (int i = 0; i < m_uiCount; ++i)
+    {
+        SString strHash;
+        if (BitStream.ReadStr(strHash) != true)
+            return false;
+
+        m_Hashes.emplace_back(std::move(strHash));
+    }
+
+    return true;
 }

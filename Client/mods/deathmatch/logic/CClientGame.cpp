@@ -1035,23 +1035,8 @@ void CClientGame::DoPulses()
 
     // Pulse the network interface
     if (g_pNet->IsConnected())
-    {     
-        if(m_bMagicStatus == MAGIC_RECIEVED)
-        {
-            // Send the magic to the server
-            NetBitStreamInterface* pBitStream = g_pNet->AllocateNetBitStream();
-            if (pBitStream)
-            {
-                pBitStream->Write(m_ulMagic);
-
-                // Send the packet as joindata
-                g_pNet->SendPacket(PACKET_ID_PLAYER_JOINMAGIC, pBitStream, PACKET_PRIORITY_HIGH, PACKET_RELIABILITY_RELIABLE_ORDERED);
-                g_pNet->DeallocateNetBitStream(pBitStream);
-            }
-
-            m_bMagicStatus = MAGIC_APPROVED;
-        }
-        else if (m_bMagicStatus == MAGIC_PENDING && (GetTickCount64_() - m_ullMagicPendingTime) > 10000)
+    {
+        if (m_bMagicStatus == MAGIC_PENDING && (GetTickCount64_() - m_ullMagicPendingTime) > 10000)
         {
             OnMagicCheckTimeout();
         }
@@ -3556,14 +3541,14 @@ void CClientGame::OnMagicCheckTimeout()
         return;
 
     SString strReason = _("Disconnected: Magic verification failed");
-    SString strErrorCode = _E("RP01");  
+    SString strErrorCode = _E("RP01");
 
     // Display the error
     g_pCore->ShowErrorMessageBox(_("Disconnected") + strErrorCode, strReason);
 
     AddReportLog(7107, SString("Game - Disconnected (%s) (%s)", *strErrorCode, *strReason.Replace("\n", " ")));
 
-     // Terminate the mod (disconnect first in case there were more packets after this one)
+    // Terminate the mod (disconnect first in case there were more packets after this one)
     m_bGracefulDisconnect = true;
     g_pNet->StopNetwork();
     g_pCore->GetModManager()->RequestUnload();
@@ -5550,10 +5535,32 @@ bool CClientGame::StaticProcessPacket(unsigned char ucPacketID, NetBitStreamInte
     return false;
 }
 
-void CClientGame::OnMagicRecieved(unsigned long ulMagic)
-{
-    m_ulMagic = ulMagic;
+void CClientGame::OnMagicRecieved()
+{      
     m_bMagicStatus = MAGIC_RECIEVED;
+}
+
+void CClientGame::SendMagicBack(const std::vector<SString>& fileHashes)
+{
+    if (m_bMagicStatus != MAGIC_RECIEVED)
+        return;
+
+    // Send the magic to the server
+    NetBitStreamInterface* pBitStream = g_pNet->AllocateNetBitStream();
+    if (pBitStream)
+    {
+        unsigned int uiCount = fileHashes.size();
+        pBitStream->Write(uiCount);
+
+        for (const auto& hash : fileHashes)
+            pBitStream->WriteStr(hash);
+
+        // Send the packet as joindata
+        g_pNet->SendPacket(PACKET_ID_PLAYER_JOINMAGIC, pBitStream, PACKET_PRIORITY_HIGH, PACKET_RELIABILITY_RELIABLE_ORDERED);
+        g_pNet->DeallocateNetBitStream(pBitStream);
+    }
+
+    m_bMagicStatus = MAGIC_APPROVED;
 }
 
 void CClientGame::SendExplosionSync(const CVector& vecPosition, eExplosionType Type, CClientEntity* pOrigin)

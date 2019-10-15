@@ -40,6 +40,7 @@ class CCore;
 #include <ijsify.h>
 #include <core/CWebCoreInterface.h>
 #include "CTrayIcon.h"
+#include "CVerificationManager.h"
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
@@ -102,6 +103,8 @@ public:
     CLocalizationInterface* GetLocalization() { return g_pLocalization; };
     CWebCoreInterface*      GetWebCore();
     CTrayIconInterface*     GetTrayIcon() { return m_pTrayIcon; };
+
+    CVerificationManagerInterface* GetVerification() { return m_pVerification; }
 
     void SaveConfig(bool bWaitUntilFinished = false);
 
@@ -294,6 +297,8 @@ private:
     CClientVariables   m_ClientVariables;
     CWebCoreInterface* m_pWebCore = nullptr;
     CTrayIcon*         m_pTrayIcon;
+
+    CVerificationManagerInterface* m_pVerification = nullptr;
 
     // Hook interfaces.
     CMessageLoopHook*        m_pMessageLoopHook;

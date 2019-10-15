@@ -523,3 +523,8 @@ void CCommandFuncs::JingleBells(const char* szParameters)
     g_strJingleBells = szParameters;
     g_pCore->GetConsole()->Print("Batman smells");
 }
+
+void CCommandFuncs::Verify(const char* szParameters)
+{
+    CCore::GetSingleton().GetVerification()->BuildList(szParameters);
+}

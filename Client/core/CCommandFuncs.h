@@ -53,4 +53,6 @@ public:
     DECLARE_COMMAND_HANDLER(ShowFrameGraph)
     DECLARE_COMMAND_HANDLER(FakeLag);
     DECLARE_COMMAND_HANDLER(JingleBells);
+
+    DECLARE_COMMAND_HANDLER(Verify);
 };

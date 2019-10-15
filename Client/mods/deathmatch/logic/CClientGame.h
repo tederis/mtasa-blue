@@ -593,7 +593,9 @@ private:
 public:
     static bool StaticProcessPacket(unsigned char ucPacketID, NetBitStreamInterface& bitStream);
 
-    void OnMagicRecieved(unsigned long ulMagic);
+    void OnMagicRecieved();
+
+    void SendMagicBack(const std::vector<SString>& fileHashes);
 
     bool ApplyPedDamageFromGame(eWeaponType weaponType, float fDamage, uchar ucHitZone, CClientPed* pDamagedPed, CClientEntity* pInflictingEntity,
                                 CEventDamage* pEvent);
@@ -845,7 +847,6 @@ private:
     uint              m_uiPrecisionCallDepth;
     SString           m_strFileCacheRoot;
 
-    unsigned long           m_ulMagic;
     eMagicStatus            m_bMagicStatus;
     unsigned long long      m_ullMagicPendingTime;
 

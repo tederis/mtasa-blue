@@ -11,13 +11,18 @@
 
 #include "StdInc.h"
 
-CPlayerConnectMagicPacket::CPlayerConnectMagicPacket(unsigned long ulMagic) : m_ulMagic(ulMagic)
+CPlayerConnectMagicPacket::CPlayerConnectMagicPacket(CFileValidator* pValidator) : m_pValidator(pValidator)
 {
 }
 
 bool CPlayerConnectMagicPacket::Write(NetBitStreamInterface& BitStream) const
 {
-    BitStream.Write(m_ulMagic);
+    BitStream.Write(m_pValidator->GetEntriesCount());
+
+    for (auto& entry : m_pValidator->GetEntries())
+    {
+        BitStream.WriteStr(entry.strFileName);
+    }
 
     return true;
 }

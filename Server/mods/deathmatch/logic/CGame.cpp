@@ -205,12 +205,6 @@ CGame::CGame() : m_FloodProtect(4, 30000, 30000)            // Max of 4 connecti
 
     // init our mutex
     pthread_mutex_init(&mutexhttp, NULL);
-
-    std::random_device                           rd;
-    std::mt19937                                 rng(rd());
-    std::uniform_int_distribution<unsigned long> uni(1024, 4194304);
-
-    m_ulMagic = static_cast<unsigned long>(floor((float)uni(rng) / 2.0f)) * 2;
 }
 
 void CGame::ResetMapInfo()
@@ -501,7 +495,10 @@ void CGame::UpdatePendingPlayers(long long llDt)
         entry.ulTimeElapsed += llDt;
         if (entry.ulTimeElapsed > 40000)
         {
-            if (!entry.m_pPlayer->IsMagicValid())
+            bool bMagicValid = entry.m_pPlayer->IsMagicValid();
+            it = m_PendingPlayers.erase(it);
+
+            if (bMagicValid != true)
             {
                 // Tell the console
                 CLogger::LogPrintf("DISCONNECT: %s disconnected(Magic timeout)\n", entry.m_pPlayer->GetNick());
@@ -509,8 +506,6 @@ void CGame::UpdatePendingPlayers(long long llDt)
                 // Disconnect the player
                 DisconnectPlayer(g_pGame, *entry.m_pPlayer, CPlayerDisconnectedPacket::NO_REASON);
             }
-
-            it = m_PendingPlayers.erase(it);
         }
         else
             ++it;
@@ -563,6 +558,16 @@ bool CGame::Start(int iArgumentCount, char* szArguments[])
     m_pBuildingRemovalManager = new CBuildingRemovalManager;
 
     m_pCustomWeaponManager = new CCustomWeaponManager();
+
+    m_pFileValidator = new CFileValidator();
+
+    SString strVerifyFile = g_pServerInterface->GetModManager()->GetAbsolutePath("verifylist.xml");
+    auto xml = g_pServerInterface->GetXML()->CreateXML(strVerifyFile);
+    if (xml)
+    {
+        m_pFileValidator->LoadFromXML(xml);
+        delete xml;
+    }
 
     // Parse the commandline
     if (!m_CommandLineParser.Parse(iArgumentCount, szArguments))
@@ -1934,12 +1939,7 @@ void CGame::Packet_PlayerJoinMagic(CPlayerJoinMagicPacket& Packet)
     if (!pPlayer)
         return;
 
-    unsigned long ulMagic = m_ulMagic;
-
-    ulMagic /= 2;
-    ulMagic += 0xFF;
-
-    if (Packet.GetMagic() == ulMagic)
+    if (m_pFileValidator->Validate(Packet.GetHashes()))
     {
         // Tell the console
         CLogger::LogPrintf("CONNECT: %s connected (Magic accepted)\n", pPlayer->GetNick());
@@ -1948,6 +1948,7 @@ void CGame::Packet_PlayerJoinMagic(CPlayerJoinMagicPacket& Packet)
     }
     else
         CLogger::LogPrintf("REJECT: %s rejected (Invalid magic)\n", pPlayer->GetNick());
+
 }
 
 void CGame::Packet_PedWasted(CPedWastedPacket& Packet)
@@ -3993,8 +3994,8 @@ void CGame::PlayerCompleteConnect(CPlayer* pPlayer)
 
     m_PendingPlayers.push_back(std::move(entry));
 
-    // Send him the magic number
-    pPlayer->Send(CPlayerConnectMagicPacket(m_ulMagic));
+    // Send him the validation list
+    pPlayer->Send(CPlayerConnectMagicPacket(m_pFileValidator));
 }
 
 void CGame::Lock()

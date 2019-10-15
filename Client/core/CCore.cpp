@@ -72,6 +72,8 @@ CCore::CCore()
     // Create the mod manager
     m_pModManager = new CModManager;
 
+    m_pVerification = new CVerificationManager();
+
     CCrashDumpWriter::SetHandlers();
 
     m_pfnMessageProcessor = NULL;
@@ -1315,6 +1317,8 @@ void CCore::RegisterCommands()
     m_pCommands->Add("fakelag", "", CCommandFuncs::FakeLag);
     
     m_pCommands->Add("reloadnews", "for developers: reload news", CCommandFuncs::ReloadNews);
+
+    m_pCommands->Add("verifylist", "", CCommandFuncs::Verify);
 }
 
 void CCore::SwitchRenderWindow(HWND hWnd, HWND hWndInput)

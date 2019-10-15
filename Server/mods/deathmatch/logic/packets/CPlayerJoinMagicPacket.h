@@ -23,8 +23,10 @@ public:
 
     bool Read(NetBitStreamInterface& BitStream);
 
-    unsigned long GetMagic() { return m_ulMagic; }
+    unsigned int GetCount() const { return m_uiCount; }
+    const std::vector<SString>& GetHashes() const { return m_Hashes; }
 
 private:
-    unsigned long m_ulMagic;
+    unsigned int m_uiCount;
+    std::vector<SString> m_Hashes;
 };

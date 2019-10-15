@@ -23,6 +23,7 @@
 #include "CWebCoreInterface.h"
 #include "CTrayIconInterface.h"
 #include "CChatInterface.h"
+#include "CVerificationManagerInterface.h"
 #include "xml/CXML.h"
 #include <gui/CGUI.h>
 

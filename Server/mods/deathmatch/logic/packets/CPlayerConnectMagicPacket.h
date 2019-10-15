@@ -12,11 +12,12 @@
 #pragma once
 
 #include "CPacket.h"
+#include "CFileValidator.h"
 
 class CPlayerConnectMagicPacket : public CPacket
 {
 public:
-    CPlayerConnectMagicPacket(unsigned long ulMagic);
+    CPlayerConnectMagicPacket(CFileValidator* pValidator);
 
     ePacketID     GetPacketID() const { return static_cast<ePacketID>(PACKET_ID_SERVER_JOIN_MAGIC); };
     unsigned long GetFlags() const { return PACKET_HIGH_PRIORITY | PACKET_RELIABLE | PACKET_SEQUENCED; };
@@ -24,5 +25,5 @@ public:
     bool Write(NetBitStreamInterface& BitStream) const;
 
 private:
-    unsigned long m_ulMagic;
+    CFileValidator* m_pValidator;
 };

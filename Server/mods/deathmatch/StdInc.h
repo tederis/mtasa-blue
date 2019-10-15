@@ -288,6 +288,7 @@ struct SAclRequest;
 #include "CXMLConfig.h"
 #include "CZoneNames.h"
 #include "TaskNames.h"
+#include "CFileValidator.h"
 #include "Utils.h"
 #include "logic/CWeaponStat.h"
 #include "logic/CCustomWeapon.h"
