@@ -1941,7 +1941,7 @@ void CGame::Packet_PlayerJoinMagic(CPlayerJoinMagicPacket& Packet)
     if (!pPlayer)
         return;
 
-    if (m_pFileValidator->Validate(Packet.GetHashes()))
+    if (m_pFileValidator->Validate(pPlayer, Packet.GetHashes()))
     {
         // Tell the console
         CLogger::LogPrintf("CONNECT: %s connected (Magic accepted)\n", pPlayer->GetNick());

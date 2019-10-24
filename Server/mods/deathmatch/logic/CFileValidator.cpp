@@ -46,16 +46,21 @@ void CFileValidator::InsertEntry(SReferenceEntry&& entry)
     CLogger::LogPrintf("[Verification] File %s added\n", entry.strFileName.c_str());
 }
 
-bool CFileValidator::Validate(const std::vector<SString>& hashes) const
+bool CFileValidator::Validate(CPlayer* pPlayer, const std::vector<SString>& hashes) const
 {
     if (hashes.size() != m_Entries.size())
         return false;
 
+    bool bFailed = false;
+
     for (int i = 0; i < hashes.size(); ++i)
     {
         if (hashes[i] != m_Entries[i].strLargeSha256)
-            return false;
+        {        
+            CLogger::LogPrintf("[Verification] File %s sha256 %s should be %s [%s]\n", m_Entries[i].strFileName.c_str(), hashes[i].c_str(), m_Entries[i].strLargeSha256.c_str(), pPlayer->GetNick());
+            bFailed = true;
+        }
     }
 
-    return true;
+    return !bFailed;
 }

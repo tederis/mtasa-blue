@@ -16,7 +16,7 @@ public:
 
     void InsertEntry(SReferenceEntry&& entry);
 
-    bool Validate(const std::vector<SString>& hashes) const;
+    bool Validate(CPlayer* pPlayer, const std::vector<SString>& hashes) const;
 
     unsigned int GetEntriesCount() const { return m_Entries.size(); }
 
