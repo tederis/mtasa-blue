@@ -568,6 +568,8 @@ bool CGame::Start(int iArgumentCount, char* szArguments[])
         m_pFileValidator->LoadFromXML(xml);
         delete xml;
     }
+    else
+        CLogger::LogPrintf("Verification list file was not found.\n");
 
     // Parse the commandline
     if (!m_CommandLineParser.Parse(iArgumentCount, szArguments))

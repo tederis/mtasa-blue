@@ -42,6 +42,8 @@ void CFileValidator::LoadFromXML(CXMLFile* pXML)
 void CFileValidator::InsertEntry(SReferenceEntry&& entry)
 {
     m_Entries.emplace_back(std::move(entry));
+
+    CLogger::LogPrintf("[Verification] File %s added\n", entry.strFileName.c_str());
 }
 
 bool CFileValidator::Validate(const std::vector<SString>& hashes) const
